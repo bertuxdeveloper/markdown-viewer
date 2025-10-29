@@ -6,6 +6,7 @@
   <title>Markdown Viewer (Material Design)</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/github.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <style>
     :root {
       --md-sys-color-primary: #1976d2;
@@ -203,6 +204,103 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+    /* Table of Contents */
+    #tocPanel {
+      position: fixed;
+      right: -320px;
+      top: 65px;
+      bottom: 0;
+      width: 300px;
+      background: var(--md-sys-color-surface);
+      border-left: 1px solid var(--md-sys-color-outline);
+      padding: 20px;
+      overflow-y: auto;
+      transition: right 0.3s ease;
+      z-index: 100;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+    }
+    #tocPanel.show {
+      right: 0;
+    }
+    #tocPanel h3 {
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+    }
+    #tocList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #tocList li {
+      margin: 0;
+      padding: 0;
+    }
+    #tocList a {
+      display: block;
+      padding: 6px 0;
+      color: var(--md-sys-color-on-surface);
+      text-decoration: none;
+      font-size: 14px;
+      border-left: 2px solid transparent;
+      padding-left: 12px;
+      transition: all 0.2s;
+    }
+    #tocList a:hover {
+      color: var(--md-sys-color-primary);
+      border-left-color: var(--md-sys-color-primary);
+      background: var(--md-sys-color-hover);
+    }
+    #tocList a.active {
+      color: var(--md-sys-color-primary);
+      border-left-color: var(--md-sys-color-primary);
+      font-weight: 500;
+    }
+    #tocList .toc-h1 { padding-left: 12px; }
+    #tocList .toc-h2 { padding-left: 24px; font-size: 13px; }
+    #tocList .toc-h3 { padding-left: 36px; font-size: 12px; }
+    #tocList .toc-h4 { padding-left: 48px; font-size: 12px; opacity: 0.8; }
+    #tocList .toc-h5 { padding-left: 60px; font-size: 11px; opacity: 0.7; }
+    #tocList .toc-h6 { padding-left: 72px; font-size: 11px; opacity: 0.6; }
+    #tocToggle {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--md-sys-color-primary);
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: all 0.3s;
+      z-index: 99;
+      display: none;
+    }
+    #tocToggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    }
+    #tocToggle.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Mermaid diagrams */
+    .mermaid {
+      background: var(--md-sys-color-background);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 16px 0;
+      text-align: center;
+    }
+    /* KaTeX math */
+    .katex-display {
+      margin: 16px 0;
     }
     #preview pre {
       background: var(--md-sys-color-code-bg);
@@ -500,6 +598,21 @@
         font-size: 11px;
         padding: 8px 12px;
       }
+      #tocPanel {
+        width: 80vw;
+        max-width: 300px;
+        right: -85vw;
+      }
+      #tocPanel.show {
+        right: 0;
+      }
+      #tocToggle {
+        right: 16px;
+        bottom: 16px;
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+      }
     }
     @media (max-width: 480px) {
       header h1 {
@@ -566,7 +679,7 @@
       </div>
     </section>
   </main>
-  <footer>Markdown rendering by marked.js • Code highlighting by highlight.js • Zip extraction by JSZip</footer>
+  <footer>Markdown by marked.js • Highlighting by highlight.js • Diagrams by mermaid.js • Math by KaTeX • Zip by JSZip</footer>
 
   <!-- Loading overlay -->
   <div id="loadingOverlay">
@@ -579,9 +692,19 @@
   <!-- Toast container -->
   <div id="toastContainer"></div>
 
+  <!-- Table of Contents -->
+  <button id="tocToggle" title="Toggle Table of Contents">📑</button>
+  <div id="tocPanel">
+    <h3>Table of Contents</h3>
+    <ul id="tocList"></ul>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/highlight.js/lib/common/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
   <script>
     // ============================================================================
     // CONSTANTS & CONFIGURATION
@@ -646,7 +769,10 @@
       sidebar: document.getElementById('sidebar'),
       resizeHandle: document.getElementById('resizeHandle'),
       menuToggle: document.getElementById('menuToggle'),
-      sidebarOverlay: document.getElementById('sidebarOverlay')
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      tocToggle: document.getElementById('tocToggle'),
+      tocPanel: document.getElementById('tocPanel'),
+      tocList: document.getElementById('tocList')
     };
 
     // ============================================================================
@@ -754,6 +880,112 @@
     }
 
     /**
+     * Renders math equations using KaTeX
+     */
+    function renderMath() {
+      if (window.renderMathInElement) {
+        renderMathInElement(DOM.preview, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    /**
+     * Renders Mermaid diagrams
+     */
+    async function renderMermaid() {
+      if (!window.mermaid) return;
+
+      // Find code blocks with language 'mermaid'
+      const mermaidBlocks = DOM.preview.querySelectorAll('pre code.language-mermaid');
+
+      for (let i = 0; i < mermaidBlocks.length; i++) {
+        const block = mermaidBlocks[i];
+        const code = block.textContent;
+        const pre = block.parentElement;
+
+        try {
+          // Create a div for mermaid
+          const div = document.createElement('div');
+          div.className = 'mermaid';
+          div.textContent = code;
+
+          // Replace the pre block with the mermaid div
+          pre.replaceWith(div);
+        } catch (e) {
+          console.error('Mermaid rendering error:', e);
+        }
+      }
+
+      // Initialize mermaid rendering
+      try {
+        await mermaid.run({
+          querySelector: '.mermaid'
+        });
+      } catch (e) {
+        console.error('Mermaid initialization error:', e);
+      }
+    }
+
+    /**
+     * Generates Table of Contents from headings
+     */
+    function generateTOC() {
+      const headings = DOM.preview.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+      if (headings.length === 0) {
+        DOM.tocToggle.classList.remove('show');
+        DOM.tocPanel.classList.remove('show');
+        return;
+      }
+
+      DOM.tocToggle.classList.add('show');
+      DOM.tocList.innerHTML = '';
+
+      headings.forEach((heading, index) => {
+        const level = heading.tagName.toLowerCase();
+        const text = heading.textContent;
+        const id = heading.id || `heading-${index}`;
+
+        if (!heading.id) {
+          heading.id = id;
+        }
+
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `#${id}`;
+        a.textContent = text;
+        a.className = `toc-${level}`;
+        a.onclick = (e) => {
+          e.preventDefault();
+          const target = document.getElementById(id);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Update active state
+            DOM.tocList.querySelectorAll('a').forEach(link => link.classList.remove('active'));
+            a.classList.add('active');
+          }
+        };
+
+        li.appendChild(a);
+        DOM.tocList.appendChild(li);
+      });
+    }
+
+    /**
+     * Toggles TOC panel visibility
+     */
+    function toggleTOC() {
+      DOM.tocPanel.classList.toggle('show');
+    }
+
+    /**
      * Gets the current theme from localStorage or system preference
      * @returns {string} 'light' or 'dark'
      */
@@ -775,6 +1007,15 @@
         localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, theme);
       } catch (e) {
         console.warn('Failed to save theme preference:', e);
+      }
+
+      // Update Mermaid theme if initialized
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: theme === 'dark' ? 'dark' : 'default',
+          securityLevel: 'loose'
+        });
       }
     }
 
@@ -1108,6 +1349,15 @@
           h.id = id;
         });
 
+        // Render Mermaid diagrams
+        await renderMermaid();
+
+        // Render math equations
+        renderMath();
+
+        // Generate Table of Contents
+        generateTOC();
+
         // Handle anchor links
         DOM.preview.querySelectorAll('a[href^="#"]').forEach(a => {
           a.addEventListener('click', e => {
@@ -1292,6 +1542,9 @@
     DOM.menuToggle.onclick = toggleMobileSidebar;
     DOM.sidebarOverlay.onclick = closeMobileSidebar;
 
+    // TOC toggle
+    DOM.tocToggle.onclick = toggleTOC;
+
     // ============================================================================
     // RESIZABLE SIDEBAR
     // ============================================================================
@@ -1397,6 +1650,13 @@
           }
           break;
 
+        case 't':
+        case 'T':
+          // Toggle Table of Contents
+          toggleTOC();
+          e.preventDefault();
+          break;
+
         case '?':
           // Show keyboard shortcuts help
           showKeyboardHelp();
@@ -1434,6 +1694,10 @@
               <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Toggle dark mode</td>
             </tr>
             <tr>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);"><code>T</code></td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Toggle Table of Contents</td>
+            </tr>
+            <tr>
               <td style="padding:8px 12px;"><code>?</code></td>
               <td style="padding:8px 12px;">Show this help</td>
             </tr>
@@ -1459,6 +1723,15 @@
     const savedWidth = localStorage.getItem(CONFIG.STORAGE_KEYS.SIDEBAR_WIDTH);
     if (savedWidth) {
       DOM.sidebar.style.width = savedWidth + 'px';
+    }
+
+    // Initialize Mermaid
+    if (window.mermaid) {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+        securityLevel: 'loose'
+      });
     }
   </script>
 </body>
