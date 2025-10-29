@@ -29,7 +29,12 @@
       --md-sys-color-error-bg: #3e1f1f;
       --md-sys-color-error-text: #ef5350;
     }
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
     body {
       margin: 0;
       font-family: 'Roboto', sans-serif;
@@ -76,10 +81,28 @@
     }
     aside {
       width: 320px;
+      min-width: 200px;
+      max-width: 600px;
       border-right: 1px solid var(--md-sys-color-outline);
       background: var(--md-sys-color-surface);
       padding: 16px;
       overflow-y: auto;
+      position: relative;
+    }
+    .resize-handle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      cursor: col-resize;
+      background: transparent;
+      transition: background 0.2s;
+      z-index: 10;
+    }
+    .resize-handle:hover,
+    .resize-handle.resizing {
+      background: var(--md-sys-color-primary);
     }
     section {
       flex: 1;
@@ -117,25 +140,39 @@
     #fileTree details summary {
       list-style: none;
       position: relative;
-      padding-left: 20px;
+      padding: 4px 4px 4px 20px;
       cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s ease;
     }
     #fileTree details summary::before {
       content: "📁";
       position: absolute;
       left: 0;
-      top: 0;
+      top: 4px;
+      transition: transform 0.2s ease;
+    }
+    #fileTree details summary:hover::before {
+      transform: scale(1.2);
     }
     #fileTree .file {
       margin-left: 28px;
       display: flex;
       align-items: center;
       gap: 4px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      cursor: pointer;
     }
     #fileTree .file::before {
       content: "📄";
       font-size: 13px;
       opacity: 0.7;
+      transition: transform 0.2s ease;
+    }
+    #fileTree .file:hover::before {
+      transform: scale(1.2);
     }
     #fileTree details[open] > summary::before {
       content: "📂";
@@ -147,6 +184,13 @@
     #fileTree .selected {
       background: var(--md-sys-color-primary);
       color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transform: scale(1.02);
+    }
+    #fileTree .focused {
+      outline: 2px solid var(--md-sys-color-primary);
+      outline-offset: -2px;
+      background: rgba(25, 118, 210, 0.1);
     }
     #preview {
       line-height: 1.7;
@@ -154,6 +198,11 @@
       border-radius: 8px;
       padding: 24px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      animation: fadeIn 0.3s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     #preview pre {
       background: var(--md-sys-color-code-bg);
@@ -259,11 +308,224 @@
     body.dragging .drop-zone-hint {
       opacity: 1;
     }
+    /* Loading overlay */
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(4px);
+    }
+    #loadingOverlay.show {
+      display: flex;
+    }
+    .loading-content {
+      background: var(--md-sys-color-surface);
+      padding: 32px 48px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--md-sys-color-outline);
+      border-top-color: var(--md-sys-color-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      color: var(--md-sys-color-on-surface);
+      font-size: 16px;
+      font-weight: 500;
+    }
+    /* Toast notifications */
+    #toastContainer {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 300px;
+      max-width: 400px;
+      pointer-events: auto;
+      animation: slideIn 0.3s ease-out;
+      border-left: 4px solid var(--md-sys-color-primary);
+    }
+    .toast.success {
+      border-left-color: #4caf50;
+    }
+    .toast.error {
+      border-left-color: #f44336;
+    }
+    .toast.info {
+      border-left-color: #2196f3;
+    }
+    .toast-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .toast-message {
+      flex: 1;
+      font-size: 14px;
+    }
+    .toast-close {
+      background: transparent;
+      border: none;
+      color: var(--md-sys-color-on-surface);
+      cursor: pointer;
+      padding: 4px;
+      opacity: 0.6;
+      font-size: 20px;
+      line-height: 1;
+    }
+    .toast-close:hover {
+      opacity: 1;
+    }
+    .toast.hiding {
+      animation: slideOut 0.3s ease-out forwards;
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+    }
+    /* Mobile hamburger menu */
+    #menuToggle {
+      display: none;
+      background: transparent;
+      color: var(--md-sys-color-on-surface);
+      font-size: 24px;
+      padding: 8px;
+      min-width: 40px;
+    }
+    #menuToggle:hover {
+      background: var(--md-sys-color-hover);
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+    .sidebar-overlay.show {
+      display: block;
+    }
+    /* Mobile responsive styles */
+    @media (max-width: 768px) {
+      header {
+        padding: 8px 16px;
+      }
+      header h1 {
+        font-size: 18px;
+      }
+      button {
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+      #menuToggle {
+        display: flex;
+      }
+      aside {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        bottom: 0;
+        width: 80vw !important;
+        max-width: 320px;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+      }
+      aside.mobile-open {
+        left: 0;
+      }
+      .resize-handle {
+        display: none;
+      }
+      section {
+        padding: 16px;
+      }
+      #toastContainer {
+        top: 60px;
+        right: 12px;
+        left: 12px;
+      }
+      .toast {
+        min-width: unset;
+      }
+      footer {
+        font-size: 11px;
+        padding: 8px 12px;
+      }
+    }
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 16px;
+      }
+      header > div {
+        gap: 6px !important;
+      }
+      button {
+        padding: 6px 10px;
+        font-size: 13px;
+      }
+      #themeToggle {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>Markdown Viewer</h1>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button id="menuToggle" title="Toggle sidebar">☰</button>
+      <h1>Markdown Viewer</h1>
+    </div>
     <div style="display:flex;gap:10px;align-items:center;">
       <button id="themeToggle" title="Toggle dark mode">🌙</button>
       <label><input id="folderInput" type="file" webkitdirectory multiple hidden><button id="folderBtn">Folder</button></label>
@@ -271,10 +533,12 @@
       <button id="clearBtn">Clear</button>
     </div>
   </header>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <main>
-    <aside>
+    <aside id="sidebar">
       <input id="searchBox" type="search" placeholder="Search files">
       <div id="fileTree"></div>
+      <div class="resize-handle" id="resizeHandle"></div>
     </aside>
     <section id="dropZone" style="position:relative;">
       <div class="drop-zone-hint">📁 Drop folder or ZIP file here</div>
@@ -283,11 +547,37 @@
           <div id="selectedPath" style="font-size:14px;color:#5f6368;">No file selected</div>
           <button id="downloadBtn">Download HTML</button>
         </div>
-        <article id="preview">Select a markdown file to preview.</article>
+        <article id="preview">
+          <div style="text-align:center;padding:60px 20px;color:var(--md-sys-color-on-surface);opacity:0.7;">
+            <div style="font-size:64px;margin-bottom:20px;">📝</div>
+            <h2 style="margin:0 0 12px 0;font-weight:500;">Welcome to Markdown Viewer</h2>
+            <p style="margin:0 0 24px 0;font-size:16px;">Load your markdown files to get started</p>
+            <div style="max-width:400px;margin:0 auto;text-align:left;background:var(--md-sys-color-background);padding:20px;border-radius:8px;">
+              <p style="margin:0 0 12px 0;font-weight:500;">Quick Start:</p>
+              <ul style="margin:0;padding-left:20px;">
+                <li style="margin-bottom:8px;">Click <strong>Folder</strong> to load a directory</li>
+                <li style="margin-bottom:8px;">Click <strong>Zip</strong> to load a ZIP archive</li>
+                <li style="margin-bottom:8px;">Drag & drop folders or files anywhere</li>
+                <li>Press <code style="background:var(--md-sys-color-code-bg);padding:2px 6px;border-radius:3px;">?</code> to view keyboard shortcuts</li>
+              </ul>
+            </div>
+          </div>
+        </article>
       </div>
     </section>
   </main>
   <footer>Markdown rendering by marked.js • Code highlighting by highlight.js • Zip extraction by JSZip</footer>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loadingText">Loading files...</div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastContainer"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/highlight.js/lib/common/index.min.js"></script>
@@ -299,7 +589,8 @@
     const CONFIG = {
       STORAGE_KEYS: {
         FOLDER_STATE: 'mdviewer_folder_state',
-        THEME: 'mdviewer_theme'
+        THEME: 'mdviewer_theme',
+        SIDEBAR_WIDTH: 'mdviewer_sidebar_width'
       },
       FILE_EXTENSIONS: ['.md', '.markdown'],
       SEARCH_DEBOUNCE_MS: 300,
@@ -311,11 +602,25 @@
       },
       MESSAGES: {
         NO_FILE: 'No file selected',
-        NO_FILES_LOADED: 'No files loaded.',
-        SELECT_FILE: 'Select a markdown file to preview.',
-        LOAD_ERROR: 'Error loading files. Please try again.',
-        ZIP_ERROR: 'Error processing ZIP file. Please ensure it\'s a valid ZIP.',
-        FILE_READ_ERROR: 'Error reading file content.'
+        NO_FILES_LOADED: 'No files loaded yet',
+        SELECT_FILE: `<div style="text-align:center;padding:60px 20px;color:var(--md-sys-color-on-surface);opacity:0.7;">
+            <div style="font-size:64px;margin-bottom:20px;">📝</div>
+            <h2 style="margin:0 0 12px 0;font-weight:500;">Welcome to Markdown Viewer</h2>
+            <p style="margin:0 0 24px 0;font-size:16px;">Load your markdown files to get started</p>
+            <div style="max-width:400px;margin:0 auto;text-align:left;background:var(--md-sys-color-background);padding:20px;border-radius:8px;">
+              <p style="margin:0 0 12px 0;font-weight:500;">Quick Start:</p>
+              <ul style="margin:0;padding-left:20px;">
+                <li style="margin-bottom:8px;">Click <strong>Folder</strong> to load a directory</li>
+                <li style="margin-bottom:8px;">Click <strong>Zip</strong> to load a ZIP archive</li>
+                <li style="margin-bottom:8px;">Drag & drop folders or files anywhere</li>
+                <li>Press <code style="background:var(--md-sys-color-code-bg);padding:2px 6px;border-radius:3px;">?</code> to view keyboard shortcuts</li>
+              </ul>
+            </div>
+          </div>`,
+        LOAD_ERROR: '⚠️ Failed to load files. Please check the file format and try again.',
+        ZIP_ERROR: '⚠️ Failed to extract ZIP file. Please ensure it\'s a valid ZIP archive containing markdown files.',
+        FILE_READ_ERROR: '⚠️ Failed to read file. The file may be corrupted or inaccessible.',
+        NO_MD_FILES: '⚠️ No markdown files found. Please ensure your files have .md or .markdown extensions.'
       }
     };
 
@@ -334,7 +639,14 @@
       selectedPath: document.getElementById('selectedPath'),
       downloadBtn: document.getElementById('downloadBtn'),
       themeToggle: document.getElementById('themeToggle'),
-      dropZone: document.getElementById('dropZone')
+      dropZone: document.getElementById('dropZone'),
+      loadingOverlay: document.getElementById('loadingOverlay'),
+      loadingText: document.getElementById('loadingText'),
+      toastContainer: document.getElementById('toastContainer'),
+      sidebar: document.getElementById('sidebar'),
+      resizeHandle: document.getElementById('resizeHandle'),
+      menuToggle: document.getElementById('menuToggle'),
+      sidebarOverlay: document.getElementById('sidebarOverlay')
     };
 
     // ============================================================================
@@ -342,8 +654,10 @@
     // ============================================================================
     let tree = null;
     let selectedPath = null;
+    let focusedPath = null;
     let folderState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FOLDER_STATE) || '{}');
     let searchDebounceTimer = null;
+    let allFileNodes = [];
 
     /**
      * Saves folder open/closed state to localStorage
@@ -375,6 +689,68 @@
      */
     function showError(message) {
       DOM.preview.innerHTML = `<div style="color:var(--md-sys-color-error-text);padding:20px;background:var(--md-sys-color-error-bg);border-radius:8px;">${message}</div>`;
+      showToast(message, 'error');
+    }
+
+    /**
+     * Shows loading overlay
+     * @param {string} message - Loading message
+     */
+    function showLoading(message = 'Loading files...') {
+      DOM.loadingText.textContent = message;
+      DOM.loadingOverlay.classList.add('show');
+    }
+
+    /**
+     * Hides loading overlay
+     */
+    function hideLoading() {
+      DOM.loadingOverlay.classList.remove('show');
+    }
+
+    /**
+     * Shows a toast notification
+     * @param {string} message - Toast message
+     * @param {string} type - Toast type: 'success', 'error', 'info'
+     * @param {number} duration - Auto-dismiss duration in ms (0 = no auto-dismiss)
+     */
+    function showToast(message, type = 'info', duration = 3000) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+
+      const icons = {
+        success: '✓',
+        error: '✗',
+        info: 'ℹ'
+      };
+
+      toast.innerHTML = `
+        <span class="toast-icon">${icons[type] || icons.info}</span>
+        <span class="toast-message">${message}</span>
+        <button class="toast-close" aria-label="Close">×</button>
+      `;
+
+      const closeBtn = toast.querySelector('.toast-close');
+      closeBtn.onclick = () => dismissToast(toast);
+
+      DOM.toastContainer.appendChild(toast);
+
+      if (duration > 0) {
+        setTimeout(() => dismissToast(toast), duration);
+      }
+    }
+
+    /**
+     * Dismisses a toast notification
+     * @param {HTMLElement} toast - Toast element to dismiss
+     */
+    function dismissToast(toast) {
+      toast.classList.add('hiding');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
     }
 
     /**
@@ -409,6 +785,66 @@
       const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       applyTheme(newTheme);
+    }
+
+    /**
+     * Collects all file nodes from the tree (for keyboard navigation)
+     * @param {Object} node - Tree node
+     * @param {Array} result - Accumulator array
+     * @returns {Array} Array of file nodes
+     */
+    function collectFileNodes(node, result = []) {
+      if (node.children) {
+        node.children.forEach(child => collectFileNodes(child, result));
+      } else {
+        result.push(node);
+      }
+      return result;
+    }
+
+    /**
+     * Sets the focused file and scrolls it into view
+     * @param {string} path - File path to focus
+     */
+    function setFocusedFile(path) {
+      focusedPath = path;
+      renderTree();
+
+      // Scroll focused file into view
+      const focusedElement = DOM.fileTree.querySelector('.focused');
+      if (focusedElement) {
+        focusedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    /**
+     * Navigates to the next/previous file using keyboard
+     * @param {number} direction - 1 for next, -1 for previous
+     */
+    function navigateFiles(direction) {
+      if (allFileNodes.length === 0) return;
+
+      const currentIndex = allFileNodes.findIndex(n => n.path === focusedPath);
+      let newIndex;
+
+      if (currentIndex === -1) {
+        newIndex = direction > 0 ? 0 : allFileNodes.length - 1;
+      } else {
+        newIndex = currentIndex + direction;
+        if (newIndex < 0) newIndex = allFileNodes.length - 1;
+        if (newIndex >= allFileNodes.length) newIndex = 0;
+      }
+
+      setFocusedFile(allFileNodes[newIndex].path);
+    }
+
+    /**
+     * Opens the currently focused file
+     */
+    function openFocusedFile() {
+      if (!focusedPath) return;
+      const node = allFileNodes.find(n => n.path === focusedPath);
+      if (node) openFile(node);
     }
 
     /**
@@ -464,7 +900,7 @@
       if (files.length > 0) {
         loadFiles(files);
       } else {
-        showError('No markdown files found in dropped items.');
+        showError(CONFIG.MESSAGES.NO_MD_FILES);
       }
     }
 
@@ -528,7 +964,7 @@
       try {
         const markdownFiles = files.filter(f => isMarkdownFile(f.path));
         if (markdownFiles.length === 0) {
-          showError('No markdown files found.');
+          showError(CONFIG.MESSAGES.NO_MD_FILES);
           return;
         }
 
@@ -539,6 +975,9 @@
           mergeTrees(tree, newTree);
         }
         renderTree();
+
+        const fileCount = markdownFiles.length;
+        showToast(`Successfully loaded ${fileCount} file${fileCount !== 1 ? 's' : ''}`, 'success');
       } catch (e) {
         console.error('Error loading files:', e);
         showError(CONFIG.MESSAGES.LOAD_ERROR);
@@ -555,9 +994,19 @@
     function renderTree() {
       DOM.fileTree.innerHTML = '';
       if (!tree) {
-        DOM.fileTree.textContent = CONFIG.MESSAGES.NO_FILES_LOADED;
+        DOM.fileTree.innerHTML = `
+          <div style="text-align:center;padding:40px 20px;color:var(--md-sys-color-on-surface);opacity:0.6;">
+            <div style="font-size:48px;margin-bottom:12px;">📂</div>
+            <p style="margin:0;font-size:14px;">${CONFIG.MESSAGES.NO_FILES_LOADED}</p>
+            <p style="margin:8px 0 0 0;font-size:12px;">Use buttons above or drag files here</p>
+          </div>
+        `;
         return;
       }
+
+      // Collect all file nodes for keyboard navigation
+      allFileNodes = collectFileNodes(tree);
+
       DOM.fileTree.appendChild(renderNode(tree));
     }
 
@@ -599,9 +1048,15 @@
         if (q && !matches(node)) return null;
 
         const div = document.createElement('div');
-        div.className = CONFIG.CSS_CLASSES.FILE + (selectedPath === node.path ? ' ' + CONFIG.CSS_CLASSES.SELECTED : '');
+        let className = CONFIG.CSS_CLASSES.FILE;
+        if (selectedPath === node.path) className += ' ' + CONFIG.CSS_CLASSES.SELECTED;
+        if (focusedPath === node.path) className += ' focused';
+        div.className = className;
         div.textContent = node.name;
-        div.onclick = () => openFile(node);
+        div.onclick = () => {
+          focusedPath = node.path;
+          openFile(node);
+        };
         return div;
       }
     }
@@ -626,6 +1081,11 @@
       try {
         selectedPath = node.path;
         DOM.selectedPath.textContent = node.path;
+
+        // Close mobile sidebar when file is selected
+        if (window.innerWidth <= 768 && typeof closeMobileSidebar === 'function') {
+          closeMobileSidebar();
+        }
 
         let text = '';
         if (node.file._content !== undefined) {
@@ -671,6 +1131,7 @@
             navigator.clipboard.writeText(codeBlock.textContent.trim());
             btn.classList.add(CONFIG.CSS_CLASSES.COPIED);
             setTimeout(() => btn.classList.remove(CONFIG.CSS_CLASSES.COPIED), 1500);
+            showToast('Code copied to clipboard', 'success', 2000);
           };
           pre.appendChild(btn);
         });
@@ -698,16 +1159,25 @@
     };
 
     DOM.folderInput.onchange = e => {
-      const files = Array.from(e.target.files).map(f => ({
-        path: f.webkitRelativePath || f.name,
-        file: f
-      }));
-      loadFiles(files);
+      showLoading('Loading folder...');
+      setTimeout(() => {
+        try {
+          const files = Array.from(e.target.files).map(f => ({
+            path: f.webkitRelativePath || f.name,
+            file: f
+          }));
+          loadFiles(files);
+        } finally {
+          hideLoading();
+        }
+      }, 100);
     };
 
     DOM.zipInput.onchange = async e => {
       const zipFile = e.target.files[0];
       if (!zipFile) return;
+
+      showLoading('Extracting ZIP file...');
 
       try {
         const zip = await JSZip.loadAsync(await zipFile.arrayBuffer());
@@ -730,6 +1200,8 @@
       } catch (e) {
         console.error('Error processing ZIP:', e);
         showError(CONFIG.MESSAGES.ZIP_ERROR);
+      } finally {
+        hideLoading();
       }
     };
 
@@ -780,11 +1252,15 @@
       document.body.classList.remove('dragging');
       DOM.dropZone.classList.remove('drag-over');
 
+      showLoading('Processing dropped files...');
+
       try {
         await handleDroppedFiles(e.dataTransfer);
       } catch (error) {
         console.error('Error handling dropped files:', error);
         showError(CONFIG.MESSAGES.LOAD_ERROR);
+      } finally {
+        hideLoading();
       }
     });
 
@@ -800,11 +1276,190 @@
     });
 
     // ============================================================================
+    // MOBILE MENU
+    // ============================================================================
+
+    function toggleMobileSidebar() {
+      DOM.sidebar.classList.toggle('mobile-open');
+      DOM.sidebarOverlay.classList.toggle('show');
+    }
+
+    function closeMobileSidebar() {
+      DOM.sidebar.classList.remove('mobile-open');
+      DOM.sidebarOverlay.classList.remove('show');
+    }
+
+    DOM.menuToggle.onclick = toggleMobileSidebar;
+    DOM.sidebarOverlay.onclick = closeMobileSidebar;
+
+    // ============================================================================
+    // RESIZABLE SIDEBAR
+    // ============================================================================
+
+    let isResizing = false;
+    let startX = 0;
+    let startWidth = 0;
+
+    DOM.resizeHandle.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      startX = e.clientX;
+      startWidth = DOM.sidebar.offsetWidth;
+      DOM.resizeHandle.classList.add('resizing');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+
+      const delta = e.clientX - startX;
+      const newWidth = Math.max(200, Math.min(600, startWidth + delta));
+      DOM.sidebar.style.width = newWidth + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isResizing) {
+        isResizing = false;
+        DOM.resizeHandle.classList.remove('resizing');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+
+        // Save sidebar width to localStorage
+        try {
+          localStorage.setItem(CONFIG.STORAGE_KEYS.SIDEBAR_WIDTH, DOM.sidebar.offsetWidth);
+        } catch (e) {
+          console.warn('Failed to save sidebar width:', e);
+        }
+      }
+    });
+
+    // ============================================================================
+    // KEYBOARD SHORTCUTS
+    // ============================================================================
+
+    document.addEventListener('keydown', (e) => {
+      // Don't intercept if user is typing in search box
+      if (document.activeElement === DOM.searchBox) {
+        // Allow Escape to clear search and blur
+        if (e.key === 'Escape') {
+          DOM.searchBox.value = '';
+          DOM.searchBox.blur();
+          renderTree();
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Don't intercept if user is typing in input fields
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      switch (e.key) {
+        case '/':
+          // Focus search box
+          DOM.searchBox.focus();
+          e.preventDefault();
+          break;
+
+        case 'Escape':
+          // Clear search and focused file
+          DOM.searchBox.value = '';
+          focusedPath = null;
+          renderTree();
+          e.preventDefault();
+          break;
+
+        case 'ArrowDown':
+          // Navigate to next file
+          navigateFiles(1);
+          e.preventDefault();
+          break;
+
+        case 'ArrowUp':
+          // Navigate to previous file
+          navigateFiles(-1);
+          e.preventDefault();
+          break;
+
+        case 'Enter':
+          // Open focused file
+          openFocusedFile();
+          e.preventDefault();
+          break;
+
+        case 'k':
+          // Toggle dark mode with Ctrl/Cmd + K
+          if (e.ctrlKey || e.metaKey) {
+            toggleTheme();
+            e.preventDefault();
+          }
+          break;
+
+        case '?':
+          // Show keyboard shortcuts help
+          showKeyboardHelp();
+          e.preventDefault();
+          break;
+      }
+    });
+
+    /**
+     * Shows keyboard shortcuts help modal
+     */
+    function showKeyboardHelp() {
+      const helpHTML = `
+        <div style="max-width:500px;">
+          <h2 style="margin-top:0;">Keyboard Shortcuts</h2>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);"><code>/</code></td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Focus search box</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);"><code>↑/↓</code></td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Navigate files</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);"><code>Enter</code></td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Open selected file</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);"><code>Esc</code></td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Clear search / deselect</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);"><code>Ctrl/Cmd + K</code></td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Toggle dark mode</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 12px;"><code>?</code></td>
+              <td style="padding:8px 12px;">Show this help</td>
+            </tr>
+          </table>
+          <div style="margin-top:20px;text-align:right;">
+            <button onclick="this.closest('#loadingOverlay').classList.remove('show')" style="background:var(--md-sys-color-primary);color:white;border:none;padding:8px 24px;border-radius:4px;cursor:pointer;">Close</button>
+          </div>
+        </div>
+      `;
+
+      DOM.loadingOverlay.querySelector('.loading-content').innerHTML = helpHTML;
+      DOM.loadingOverlay.classList.add('show');
+    }
+
+    // ============================================================================
     // INITIALIZATION
     // ============================================================================
 
     // Initialize theme on page load
     applyTheme(getTheme());
+
+    // Restore sidebar width from localStorage
+    const savedWidth = localStorage.getItem(CONFIG.STORAGE_KEYS.SIDEBAR_WIDTH);
+    if (savedWidth) {
+      DOM.sidebar.style.width = savedWidth + 'px';
+    }
   </script>
 </body>
 </html>
