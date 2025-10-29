@@ -406,6 +406,228 @@
       font-size: 12px;
       opacity: 0.6;
     }
+    /* Settings Panel */
+    #settingsPanel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      backdrop-filter: blur(4px);
+    }
+    #settingsPanel.show {
+      display: flex;
+    }
+    .settings-content {
+      background: var(--md-sys-color-surface);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .settings-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--md-sys-color-outline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--md-sys-color-surface);
+      z-index: 1;
+    }
+    .settings-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+    }
+    .settings-close {
+      background: transparent;
+      color: var(--md-sys-color-on-surface);
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      line-height: 1;
+      opacity: 0.6;
+    }
+    .settings-close:hover {
+      opacity: 1;
+      background: var(--md-sys-color-hover);
+      border-radius: 50%;
+    }
+    .settings-body {
+      padding: 24px;
+    }
+    .settings-section {
+      margin-bottom: 32px;
+    }
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+    .settings-section h3 {
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--md-sys-color-primary);
+    }
+    .settings-item {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .settings-item label {
+      font-size: 14px;
+      color: var(--md-sys-color-on-surface);
+    }
+    .settings-item .setting-description {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 4px;
+    }
+    .settings-control {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .settings-control button {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+    .settings-control select,
+    .settings-control input[type="range"] {
+      padding: 6px 12px;
+      border: 1px solid var(--md-sys-color-outline);
+      border-radius: 4px;
+      background: var(--md-sys-color-background);
+      color: var(--md-sys-color-on-surface);
+      font-size: 14px;
+    }
+    .settings-control input[type="range"] {
+      width: 120px;
+    }
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .theme-option {
+      padding: 16px;
+      border: 2px solid var(--md-sys-color-outline);
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      background: var(--md-sys-color-background);
+    }
+    .theme-option:hover {
+      border-color: var(--md-sys-color-primary);
+      transform: scale(1.05);
+    }
+    .theme-option.active {
+      border-color: var(--md-sys-color-primary);
+      background: var(--md-sys-color-hover);
+    }
+    .theme-preview {
+      width: 100%;
+      height: 60px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+    }
+    .theme-preview-bar {
+      flex: 1;
+      border-radius: 2px;
+    }
+    .theme-option-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    /* Favorites */
+    #favoritesSection {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--md-sys-color-outline);
+    }
+    #favoritesSection h4 {
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.7;
+    }
+    #favoritesList {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .favorite-item {
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: space-between;
+    }
+    .favorite-item:hover {
+      background: var(--md-sys-color-hover);
+    }
+    .favorite-item::before {
+      content: "⭐";
+      font-size: 12px;
+    }
+    .favorite-item-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .favorite-remove {
+      background: transparent;
+      border: none;
+      color: var(--md-sys-color-on-surface);
+      cursor: pointer;
+      padding: 2px 6px;
+      opacity: 0.4;
+      font-size: 16px;
+    }
+    .favorite-remove:hover {
+      opacity: 1;
+      color: #f44336;
+    }
+    .star-toggle {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+      opacity: 0.6;
+      transition: all 0.2s;
+    }
+    .star-toggle:hover {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+    .star-toggle.favorited {
+      opacity: 1;
+    }
     #preview pre {
       background: var(--md-sys-color-code-bg);
       padding: 12px;
@@ -742,6 +964,60 @@
         font-size: 18px;
       }
     }
+    /* Export dropdown */
+    .export-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .export-dropdown-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .export-dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 4px;
+      background: var(--md-sys-color-surface);
+      min-width: 200px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-radius: 4px;
+      z-index: 1000;
+      border: 1px solid var(--md-sys-color-outline);
+    }
+    .export-dropdown-content.show {
+      display: block;
+    }
+    .export-dropdown-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid var(--md-sys-color-outline);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .export-dropdown-item:last-child {
+      border-bottom: none;
+    }
+    .export-dropdown-item:hover {
+      background: var(--md-sys-color-hover);
+    }
+    .export-dropdown-item .icon {
+      font-size: 16px;
+    }
+    .export-dropdown-item .label {
+      flex: 1;
+    }
+    .export-dropdown-item .description {
+      font-size: 11px;
+      color: #5f6368;
+      display: block;
+      margin-top: 2px;
+    }
   </style>
 </head>
 <body>
@@ -755,6 +1031,7 @@
       <label><input id="folderInput" type="file" webkitdirectory multiple hidden><button id="folderBtn">Folder</button></label>
       <label><input id="zipInput" type="file" accept=".zip" hidden><button id="zipBtn">Zip</button></label>
       <button id="clearBtn">Clear</button>
+      <button id="settingsBtn" title="Settings">⚙️</button>
     </div>
   </header>
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -766,6 +1043,10 @@
       </div>
       <input id="searchBox" type="search" placeholder="Search files">
       <div id="searchResults" class="search-result"></div>
+      <div id="favoritesSection">
+        <h4>Favorites</h4>
+        <div id="favoritesList"></div>
+      </div>
       <div id="recentFiles">
         <h4>Recent Files</h4>
         <div id="recentFilesList"></div>
@@ -781,7 +1062,34 @@
             <div id="breadcrumbNav"></div>
             <div id="selectedPath" style="font-size:14px;color:#5f6368;display:none;">No file selected</div>
           </div>
-          <button id="downloadBtn">Download HTML</button>
+          <div class="export-dropdown">
+            <button id="exportBtn" class="export-dropdown-btn" title="Export current document">
+              📥 Export ▾
+            </button>
+            <div id="exportDropdown" class="export-dropdown-content">
+              <div class="export-dropdown-item" data-export="html">
+                <span class="icon">🌐</span>
+                <div class="label">
+                  HTML
+                  <div class="description">Standalone HTML file</div>
+                </div>
+              </div>
+              <div class="export-dropdown-item" data-export="pdf">
+                <span class="icon">📄</span>
+                <div class="label">
+                  PDF
+                  <div class="description">Portable document format</div>
+                </div>
+              </div>
+              <div class="export-dropdown-item" data-export="markdown">
+                <span class="icon">📝</span>
+                <div class="label">
+                  Markdown
+                  <div class="description">Original markdown source</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <article id="preview">
           <div style="text-align:center;padding:60px 20px;color:var(--md-sys-color-on-surface);opacity:0.7;">
@@ -802,7 +1110,7 @@
       </div>
     </section>
   </main>
-  <footer>Markdown by marked.js • Highlighting by highlight.js • Diagrams by mermaid.js • Math by KaTeX • Zip by JSZip</footer>
+  <footer>Markdown by marked.js • Highlighting by highlight.js • Diagrams by mermaid.js • Math by KaTeX • Zip by JSZip • PDF by jsPDF & html2canvas</footer>
 
   <!-- Loading overlay -->
   <div id="loadingOverlay">
@@ -822,12 +1130,97 @@
     <ul id="tocList"></ul>
   </div>
 
+  <!-- Settings Panel -->
+  <div id="settingsPanel">
+    <div class="settings-content">
+      <div class="settings-header">
+        <h2>⚙️ Settings</h2>
+        <button class="settings-close" id="settingsClose">×</button>
+      </div>
+      <div class="settings-body">
+        <!-- Appearance Settings -->
+        <div class="settings-section">
+          <h3>Appearance</h3>
+
+          <div class="settings-item">
+            <div>
+              <label>Font Size</label>
+              <div class="setting-description">Adjust reading text size</div>
+            </div>
+            <div class="settings-control">
+              <input type="range" id="fontSizeRange" min="12" max="24" step="1" value="16">
+              <span id="fontSizeValue">16px</span>
+            </div>
+          </div>
+
+          <div class="settings-item">
+            <div>
+              <label>Line Height</label>
+              <div class="setting-description">Spacing between lines</div>
+            </div>
+            <div class="settings-control">
+              <select id="lineHeightSelect">
+                <option value="1.5">Compact (1.5)</option>
+                <option value="1.7" selected>Normal (1.7)</option>
+                <option value="2.0">Relaxed (2.0)</option>
+                <option value="2.5">Spacious (2.5)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-item">
+            <div>
+              <label>Preview Width</label>
+              <div class="setting-description">Maximum content width</div>
+            </div>
+            <div class="settings-control">
+              <select id="previewWidthSelect">
+                <option value="700">Narrow (700px)</option>
+                <option value="900" selected>Normal (900px)</option>
+                <option value="1200">Wide (1200px)</option>
+                <option value="100%">Full Width</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Theme Settings -->
+        <div class="settings-section">
+          <h3>Theme</h3>
+          <div id="themeGrid" class="theme-grid"></div>
+        </div>
+
+        <!-- Code Highlighting Theme -->
+        <div class="settings-section">
+          <h3>Code Highlighting</h3>
+          <div class="settings-item">
+            <div>
+              <label>Highlight Theme</label>
+              <div class="setting-description">Syntax highlighting style</div>
+            </div>
+            <div class="settings-control">
+              <select id="codeThemeSelect">
+                <option value="github">GitHub</option>
+                <option value="monokai">Monokai</option>
+                <option value="tomorrow-night">Tomorrow Night</option>
+                <option value="solarized-dark">Solarized Dark</option>
+                <option value="atom-one-dark">Atom One Dark</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/highlight.js/lib/common/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     // ============================================================================
     // CONSTANTS & CONFIGURATION
@@ -838,7 +1231,13 @@
         THEME: 'mdviewer_theme',
         SIDEBAR_WIDTH: 'mdviewer_sidebar_width',
         RECENT_FILES: 'mdviewer_recent_files',
-        SEARCH_MODE: 'mdviewer_search_mode'
+        SEARCH_MODE: 'mdviewer_search_mode',
+        FAVORITES: 'mdviewer_favorites',
+        FONT_SIZE: 'mdviewer_font_size',
+        LINE_HEIGHT: 'mdviewer_line_height',
+        PREVIEW_WIDTH: 'mdviewer_preview_width',
+        CODE_THEME: 'mdviewer_code_theme',
+        THEME_PRESET: 'mdviewer_theme_preset'
       },
       FILE_EXTENSIONS: ['.md', '.markdown'],
       SEARCH_DEBOUNCE_MS: 300,
@@ -885,7 +1284,8 @@
       fileTree: document.getElementById('fileTree'),
       preview: document.getElementById('preview'),
       selectedPath: document.getElementById('selectedPath'),
-      downloadBtn: document.getElementById('downloadBtn'),
+      exportBtn: document.getElementById('exportBtn'),
+      exportDropdown: document.getElementById('exportDropdown'),
       themeToggle: document.getElementById('themeToggle'),
       dropZone: document.getElementById('dropZone'),
       loadingOverlay: document.getElementById('loadingOverlay'),
@@ -902,7 +1302,17 @@
       searchContentBtn: document.getElementById('searchContentBtn'),
       searchResults: document.getElementById('searchResults'),
       breadcrumbNav: document.getElementById('breadcrumbNav'),
-      recentFilesList: document.getElementById('recentFilesList')
+      recentFilesList: document.getElementById('recentFilesList'),
+      favoritesList: document.getElementById('favoritesList'),
+      settingsBtn: document.getElementById('settingsBtn'),
+      settingsPanel: document.getElementById('settingsPanel'),
+      settingsClose: document.getElementById('settingsClose'),
+      fontSizeRange: document.getElementById('fontSizeRange'),
+      fontSizeValue: document.getElementById('fontSizeValue'),
+      lineHeightSelect: document.getElementById('lineHeightSelect'),
+      previewWidthSelect: document.getElementById('previewWidthSelect'),
+      themeGrid: document.getElementById('themeGrid'),
+      codeThemeSelect: document.getElementById('codeThemeSelect')
     };
 
     // ============================================================================
@@ -917,6 +1327,35 @@
     let searchMode = localStorage.getItem(CONFIG.STORAGE_KEYS.SEARCH_MODE) || 'filename';
     let recentFiles = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.RECENT_FILES) || '[]');
     let fileContentsCache = new Map(); // Cache file contents for search
+    let favorites = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]');
+
+    // Theme presets
+    const THEME_PRESETS = {
+      light: {
+        name: 'Light',
+        colors: ['#1976d2', '#ffffff', '#202124', '#dadce0', '#f8f9fa']
+      },
+      dark: {
+        name: 'Dark',
+        colors: ['#64b5f6', '#1e1e1e', '#e0e0e0', '#3e3e3e', '#121212']
+      },
+      github: {
+        name: 'GitHub',
+        colors: ['#0969da', '#ffffff', '#1f2328', '#d0d7de', '#f6f8fa']
+      },
+      dracula: {
+        name: 'Dracula',
+        colors: ['#bd93f9', '#282a36', '#f8f8f2', '#44475a', '#1e1f29']
+      },
+      nord: {
+        name: 'Nord',
+        colors: ['#88c0d0', '#2e3440', '#eceff4', '#4c566a', '#3b4252']
+      },
+      monokai: {
+        name: 'Monokai',
+        colors: ['#66d9ef', '#272822', '#f8f8f2', '#49483e', '#1e1f1c']
+      }
+    };
 
     /**
      * Saves folder open/closed state to localStorage
@@ -1322,6 +1761,417 @@
     }
 
     /**
+     * Toggles favorite status for a file
+     * @param {string} path - File path
+     * @returns {boolean} New favorite status
+     */
+    function toggleFavorite(path) {
+      const index = favorites.indexOf(path);
+      if (index > -1) {
+        favorites.splice(index, 1);
+      } else {
+        favorites.push(path);
+      }
+
+      try {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+      } catch (e) {
+        console.warn('Failed to save favorites:', e);
+      }
+
+      renderFavorites();
+      return favorites.includes(path);
+    }
+
+    /**
+     * Renders favorites list
+     */
+    function renderFavorites() {
+      DOM.favoritesList.innerHTML = '';
+
+      if (favorites.length === 0 || !tree) {
+        return;
+      }
+
+      favorites.forEach(path => {
+        const node = allFileNodes.find(n => n.path === path);
+
+        if (node) {
+          const item = document.createElement('div');
+          item.className = 'favorite-item';
+
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'favorite-item-name';
+          nameSpan.textContent = node.name;
+          nameSpan.title = path;
+          nameSpan.onclick = () => openFile(node);
+
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'favorite-remove';
+          removeBtn.textContent = '×';
+          removeBtn.title = 'Remove from favorites';
+          removeBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleFavorite(path);
+          };
+
+          item.appendChild(nameSpan);
+          item.appendChild(removeBtn);
+          DOM.favoritesList.appendChild(item);
+        }
+      });
+    }
+
+    /**
+     * Export current document as HTML with theme preservation
+     */
+    async function exportAsHTML() {
+      if (!selectedPath) {
+        showToast('No file selected', 'error');
+        return;
+      }
+
+      try {
+        showLoading('Generating HTML export...');
+
+        // Get current theme colors
+        const root = document.documentElement;
+        const computedStyle = getComputedStyle(root);
+        const primaryColor = computedStyle.getPropertyValue('--md-sys-color-primary').trim();
+        const surfaceColor = computedStyle.getPropertyValue('--md-sys-color-surface').trim();
+        const onSurfaceColor = computedStyle.getPropertyValue('--md-sys-color-on-surface').trim();
+        const codeBgColor = computedStyle.getPropertyValue('--md-sys-color-code-bg').trim();
+
+        // Get code highlighting theme
+        const codeTheme = localStorage.getItem(CONFIG.STORAGE_KEYS.CODE_THEME) || 'github';
+
+        // Create complete HTML with embedded styles
+        const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${selectedPath}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/${codeTheme}.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    :root {
+      --md-sys-color-primary: ${primaryColor};
+      --md-sys-color-surface: ${surfaceColor};
+      --md-sys-color-on-surface: ${onSurfaceColor};
+      --md-sys-color-code-bg: ${codeBgColor};
+    }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Roboto', sans-serif;
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      line-height: ${DOM.preview.style.lineHeight || '1.7'};
+      font-size: ${DOM.preview.style.fontSize || '16px'};
+    }
+    .container {
+      max-width: ${DOM.previewWidthSelect.value === '100%' ? '100%' : DOM.previewWidthSelect.value};
+      margin: 0 auto;
+    }
+    .mermaid {
+      background: rgba(0,0,0,0.05);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 16px 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    ${DOM.preview.innerHTML}
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"><\/script>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: '${root.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'}' });
+  <\/script>
+</body>
+</html>`;
+
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = (selectedPath ? selectedPath.replace(/\//g, '_') : 'markdown') + '.html';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        hideLoading();
+        showToast('HTML exported successfully', 'success');
+      } catch (error) {
+        hideLoading();
+        console.error('HTML export error:', error);
+        showToast('Failed to export HTML', 'error');
+      }
+    }
+
+    /**
+     * Export current document as PDF
+     */
+    async function exportAsPDF() {
+      if (!selectedPath) {
+        showToast('No file selected', 'error');
+        return;
+      }
+
+      if (!window.jspdf || !window.html2canvas) {
+        showToast('PDF export library not loaded', 'error');
+        return;
+      }
+
+      try {
+        showLoading('Generating PDF export...');
+
+        // Create a temporary container with proper styling
+        const tempContainer = document.createElement('div');
+        tempContainer.style.cssText = `
+          position: absolute;
+          left: -9999px;
+          top: 0;
+          width: 800px;
+          padding: 40px;
+          background: white;
+          color: #000;
+        `;
+        tempContainer.innerHTML = DOM.preview.innerHTML;
+        document.body.appendChild(tempContainer);
+
+        // Wait for images and mermaid to render
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const canvas = await html2canvas(tempContainer, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: false
+        });
+
+        document.body.removeChild(tempContainer);
+
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const imgWidth = 210; // A4 width in mm
+        const pageHeight = 297; // A4 height in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        pdf.save((selectedPath ? selectedPath.replace(/\//g, '_') : 'markdown') + '.pdf');
+
+        hideLoading();
+        showToast('PDF exported successfully', 'success');
+      } catch (error) {
+        hideLoading();
+        console.error('PDF export error:', error);
+        showToast('Failed to export PDF', 'error');
+      }
+    }
+
+    /**
+     * Export original markdown source
+     */
+    async function exportAsMarkdown() {
+      if (!selectedPath) {
+        showToast('No file selected', 'error');
+        return;
+      }
+
+      try {
+        showLoading('Exporting markdown...');
+
+        // Find the file node
+        const node = allFileNodes.find(n => n.path === selectedPath);
+        if (!node || !node.file) {
+          throw new Error('File not found');
+        }
+
+        // Read the original markdown content
+        const content = await node.file.text();
+
+        // Add metadata header
+        const date = new Date().toISOString().split('T')[0];
+        const annotatedContent = `---
+exported: ${date}
+source: ${selectedPath}
+viewer: Markdown Viewer
+---
+
+${content}`;
+
+        const blob = new Blob([annotatedContent], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = selectedPath.split('/').pop();
+        a.click();
+        URL.revokeObjectURL(url);
+
+        hideLoading();
+        showToast('Markdown exported successfully', 'success');
+      } catch (error) {
+        hideLoading();
+        console.error('Markdown export error:', error);
+        showToast('Failed to export markdown', 'error');
+      }
+    }
+
+    /**
+     * Opens settings panel
+     */
+    function openSettings() {
+      DOM.settingsPanel.classList.add('show');
+    }
+
+    /**
+     * Closes settings panel
+     */
+    function closeSettings() {
+      DOM.settingsPanel.classList.remove('show');
+    }
+
+    /**
+     * Sets font size
+     * @param {number} size - Font size in pixels
+     */
+    function setFontSize(size) {
+      DOM.preview.style.fontSize = size + 'px';
+      DOM.fontSizeValue.textContent = size + 'px';
+      localStorage.setItem(CONFIG.STORAGE_KEYS.FONT_SIZE, size);
+    }
+
+    /**
+     * Sets line height
+     * @param {number} height - Line height value
+     */
+    function setLineHeight(height) {
+      DOM.preview.style.lineHeight = height;
+      localStorage.setItem(CONFIG.STORAGE_KEYS.LINE_HEIGHT, height);
+    }
+
+    /**
+     * Sets preview width
+     * @param {string} width - Width value (e.g., "900px" or "100%")
+     */
+    function setPreviewWidth(width) {
+      const container = DOM.preview.closest('div[style*="max-width"]');
+      if (container) {
+        container.style.maxWidth = width;
+      }
+      localStorage.setItem(CONFIG.STORAGE_KEYS.PREVIEW_WIDTH, width);
+    }
+
+    /**
+     * Applies a theme preset
+     * @param {string} presetName - Theme preset name
+     */
+    function applyThemePreset(presetName) {
+      const preset = THEME_PRESETS[presetName];
+      if (!preset) return;
+
+      const root = document.documentElement;
+      const isDark = ['dark', 'dracula', 'nord', 'monokai'].includes(presetName);
+
+      // Apply colors
+      root.style.setProperty('--md-sys-color-primary', preset.colors[0]);
+      root.style.setProperty('--md-sys-color-surface', preset.colors[1]);
+      root.style.setProperty('--md-sys-color-on-surface', preset.colors[2]);
+      root.style.setProperty('--md-sys-color-outline', preset.colors[3]);
+      root.style.setProperty('--md-sys-color-background', preset.colors[4]);
+
+      // Set appropriate data-theme
+      root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+
+      // Update theme toggle icon
+      DOM.themeToggle.textContent = isDark ? '☀️' : '🌙';
+
+      // Save preset
+      localStorage.setItem(CONFIG.STORAGE_KEYS.THEME_PRESET, presetName);
+
+      // Update Mermaid theme
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: isDark ? 'dark' : 'default',
+          securityLevel: 'loose'
+        });
+      }
+
+      // Update active theme in grid
+      renderThemeGrid();
+    }
+
+    /**
+     * Renders theme selection grid
+     */
+    function renderThemeGrid() {
+      const currentPreset = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME_PRESET) || 'light';
+      DOM.themeGrid.innerHTML = '';
+
+      Object.entries(THEME_PRESETS).forEach(([key, preset]) => {
+        const option = document.createElement('div');
+        option.className = 'theme-option' + (currentPreset === key ? ' active' : '');
+
+        const preview = document.createElement('div');
+        preview.className = 'theme-preview';
+        preview.style.background = preset.colors[1];
+
+        preset.colors.forEach((color, index) => {
+          if (index < 3) {
+            const bar = document.createElement('div');
+            bar.className = 'theme-preview-bar';
+            bar.style.background = color;
+            preview.appendChild(bar);
+          }
+        });
+
+        const name = document.createElement('div');
+        name.className = 'theme-option-name';
+        name.textContent = preset.name;
+
+        option.appendChild(preview);
+        option.appendChild(name);
+        option.onclick = () => applyThemePreset(key);
+
+        DOM.themeGrid.appendChild(option);
+      });
+    }
+
+    /**
+     * Sets code highlighting theme
+     * @param {string} theme - Theme name
+     */
+    function setCodeTheme(theme) {
+      const link = document.querySelector('link[href*="highlight.js"]');
+      if (link) {
+        link.href = `https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/${theme}.min.css`;
+        localStorage.setItem(CONFIG.STORAGE_KEYS.CODE_THEME, theme);
+      }
+    }
+
+    /**
      * Highlights search terms in rendered content
      * @param {string} query - Search query
      */
@@ -1617,8 +2467,9 @@
         const fileCount = markdownFiles.length;
         showToast(`Successfully loaded ${fileCount} file${fileCount !== 1 ? 's' : ''}`, 'success');
 
-        // Render recent files after loading new files
+        // Render recent files and favorites after loading new files
         renderRecentFiles();
+        renderFavorites();
       } catch (e) {
         console.error('Error loading files:', e);
         showError(CONFIG.MESSAGES.LOAD_ERROR);
@@ -1726,8 +2577,21 @@
         // Add to recent files
         addToRecentFiles(node.path);
 
-        // Render breadcrumbs
+        // Render breadcrumbs with star toggle
         renderBreadcrumbs(node.path);
+
+        // Add star toggle button
+        const starBtn = document.createElement('button');
+        starBtn.className = 'star-toggle' + (favorites.includes(node.path) ? ' favorited' : '');
+        starBtn.textContent = favorites.includes(node.path) ? '⭐' : '☆';
+        starBtn.title = favorites.includes(node.path) ? 'Remove from favorites' : 'Add to favorites';
+        starBtn.onclick = () => {
+          const isFavorited = toggleFavorite(node.path);
+          starBtn.className = 'star-toggle' + (isFavorited ? ' favorited' : '');
+          starBtn.textContent = isFavorited ? '⭐' : '☆';
+          starBtn.title = isFavorited ? 'Remove from favorites' : 'Add to favorites';
+        };
+        DOM.breadcrumbNav.appendChild(starBtn);
 
         // Close mobile sidebar when file is selected
         if (window.innerWidth <= 768 && typeof closeMobileSidebar === 'function') {
@@ -1888,18 +2752,67 @@
     DOM.searchFilenameBtn.onclick = () => setSearchMode('filename');
     DOM.searchContentBtn.onclick = () => setSearchMode('content');
 
-    DOM.downloadBtn.onclick = () => {
-      const blob = new Blob(
-        [`<!doctype html><meta charset='utf-8'><link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/github.min.css'><div>${DOM.preview.innerHTML}</div>`],
-        { type: 'text/html' }
-      );
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = (selectedPath ? selectedPath.replace(/\//g, '_') : 'markdown') + '.html';
-      a.click();
-      URL.revokeObjectURL(url);
+    // Settings panel
+    DOM.settingsBtn.onclick = openSettings;
+    DOM.settingsClose.onclick = closeSettings;
+    DOM.settingsPanel.onclick = (e) => {
+      if (e.target === DOM.settingsPanel) {
+        closeSettings();
+      }
     };
+
+    // Font size control
+    DOM.fontSizeRange.oninput = (e) => {
+      setFontSize(parseInt(e.target.value));
+    };
+
+    // Line height control
+    DOM.lineHeightSelect.onchange = (e) => {
+      setLineHeight(parseFloat(e.target.value));
+    };
+
+    // Preview width control
+    DOM.previewWidthSelect.onchange = (e) => {
+      setPreviewWidth(e.target.value);
+    };
+
+    // Code theme control
+    DOM.codeThemeSelect.onchange = (e) => {
+      setCodeTheme(e.target.value);
+    };
+
+    // Export dropdown toggle
+    DOM.exportBtn.onclick = (e) => {
+      e.stopPropagation();
+      DOM.exportDropdown.classList.toggle('show');
+    };
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!DOM.exportBtn.contains(e.target) && !DOM.exportDropdown.contains(e.target)) {
+        DOM.exportDropdown.classList.remove('show');
+      }
+    });
+
+    // Export dropdown item handlers
+    document.querySelectorAll('.export-dropdown-item').forEach(item => {
+      item.onclick = async () => {
+        const exportType = item.getAttribute('data-export');
+        DOM.exportDropdown.classList.remove('show');
+
+        switch (exportType) {
+          case 'html':
+            await exportAsHTML();
+            break;
+          case 'pdf':
+            await exportAsPDF();
+            break;
+          case 'markdown':
+            await exportAsMarkdown();
+            break;
+        }
+      };
+    });
 
     // Drag and drop support
     let dragCounter = 0;
@@ -2096,6 +3009,14 @@
           }
           break;
 
+        case ',':
+          // Open settings with Ctrl/Cmd + ,
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            openSettings();
+          }
+          break;
+
         case '?':
           // Show keyboard shortcuts help
           showKeyboardHelp();
@@ -2141,6 +3062,10 @@
               <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Open most recent file</td>
             </tr>
             <tr>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);"><code>Ctrl/Cmd + ,</code></td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Open settings</td>
+            </tr>
+            <tr>
               <td style="padding:8px 12px;"><code>?</code></td>
               <td style="padding:8px 12px;">Show this help</td>
             </tr>
@@ -2180,8 +3105,45 @@
     // Initialize search mode
     setSearchMode(searchMode);
 
-    // Render recent files
+    // Render recent files and favorites
     renderRecentFiles();
+    renderFavorites();
+
+    // Initialize settings
+    const savedFontSize = localStorage.getItem(CONFIG.STORAGE_KEYS.FONT_SIZE);
+    if (savedFontSize) {
+      DOM.fontSizeRange.value = savedFontSize;
+      setFontSize(parseInt(savedFontSize));
+    }
+
+    const savedLineHeight = localStorage.getItem(CONFIG.STORAGE_KEYS.LINE_HEIGHT);
+    if (savedLineHeight) {
+      DOM.lineHeightSelect.value = savedLineHeight;
+      setLineHeight(parseFloat(savedLineHeight));
+    }
+
+    const savedPreviewWidth = localStorage.getItem(CONFIG.STORAGE_KEYS.PREVIEW_WIDTH);
+    if (savedPreviewWidth) {
+      DOM.previewWidthSelect.value = savedPreviewWidth;
+      setPreviewWidth(savedPreviewWidth);
+    }
+
+    const savedCodeTheme = localStorage.getItem(CONFIG.STORAGE_KEYS.CODE_THEME);
+    if (savedCodeTheme) {
+      DOM.codeThemeSelect.value = savedCodeTheme;
+      setCodeTheme(savedCodeTheme);
+    }
+
+    const savedThemePreset = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME_PRESET);
+    if (savedThemePreset) {
+      applyThemePreset(savedThemePreset);
+    } else {
+      // Initialize with default theme
+      applyThemePreset(getTheme());
+    }
+
+    // Render theme grid
+    renderThemeGrid();
   </script>
 </body>
 </html>
