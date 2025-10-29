@@ -302,6 +302,110 @@
     .katex-display {
       margin: 16px 0;
     }
+    /* Full-text search */
+    #searchMode {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    #searchMode button {
+      flex: 1;
+      padding: 4px 8px;
+      font-size: 12px;
+      background: transparent;
+      color: var(--md-sys-color-on-surface);
+      border: 1px solid var(--md-sys-color-outline);
+    }
+    #searchMode button.active {
+      background: var(--md-sys-color-primary);
+      color: white;
+      border-color: var(--md-sys-color-primary);
+    }
+    .search-result {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 4px;
+      font-style: italic;
+    }
+    .highlight-search {
+      background: #ffeb3b;
+      color: #000;
+      padding: 2px 4px;
+      border-radius: 2px;
+      font-weight: 500;
+    }
+    [data-theme="dark"] .highlight-search {
+      background: #ffa000;
+      color: #000;
+    }
+    /* Breadcrumb navigation */
+    #breadcrumbNav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #5f6368;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    #breadcrumbNav a {
+      color: var(--md-sys-color-primary);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+    #breadcrumbNav a:hover {
+      background: var(--md-sys-color-hover);
+      text-decoration: underline;
+    }
+    #breadcrumbNav .separator {
+      color: var(--md-sys-color-outline);
+      user-select: none;
+    }
+    #breadcrumbNav .current {
+      color: var(--md-sys-color-on-surface);
+      font-weight: 500;
+    }
+    /* Recent files */
+    #recentFiles {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--md-sys-color-outline);
+    }
+    #recentFiles h4 {
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.7;
+    }
+    #recentFilesList {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .recent-file-item {
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .recent-file-item:hover {
+      background: var(--md-sys-color-hover);
+    }
+    .recent-file-item::before {
+      content: "🕐";
+      font-size: 12px;
+      opacity: 0.6;
+    }
     #preview pre {
       background: var(--md-sys-color-code-bg);
       padding: 12px;
@@ -613,6 +717,13 @@
         height: 48px;
         font-size: 20px;
       }
+      #breadcrumbNav {
+        font-size: 12px;
+      }
+      #recentFiles {
+        margin-top: 12px;
+        padding-top: 12px;
+      }
     }
     @media (max-width: 480px) {
       header h1 {
@@ -649,7 +760,16 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <main>
     <aside id="sidebar">
+      <div id="searchMode">
+        <button id="searchFilenameBtn" class="active" title="Search by filename">Name</button>
+        <button id="searchContentBtn" title="Search in file contents">Content</button>
+      </div>
       <input id="searchBox" type="search" placeholder="Search files">
+      <div id="searchResults" class="search-result"></div>
+      <div id="recentFiles">
+        <h4>Recent Files</h4>
+        <div id="recentFilesList"></div>
+      </div>
       <div id="fileTree"></div>
       <div class="resize-handle" id="resizeHandle"></div>
     </aside>
@@ -657,7 +777,10 @@
       <div class="drop-zone-hint">📁 Drop folder or ZIP file here</div>
       <div style="max-width:900px;margin:0 auto;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <div id="selectedPath" style="font-size:14px;color:#5f6368;">No file selected</div>
+          <div style="flex:1;">
+            <div id="breadcrumbNav"></div>
+            <div id="selectedPath" style="font-size:14px;color:#5f6368;display:none;">No file selected</div>
+          </div>
           <button id="downloadBtn">Download HTML</button>
         </div>
         <article id="preview">
@@ -713,7 +836,9 @@
       STORAGE_KEYS: {
         FOLDER_STATE: 'mdviewer_folder_state',
         THEME: 'mdviewer_theme',
-        SIDEBAR_WIDTH: 'mdviewer_sidebar_width'
+        SIDEBAR_WIDTH: 'mdviewer_sidebar_width',
+        RECENT_FILES: 'mdviewer_recent_files',
+        SEARCH_MODE: 'mdviewer_search_mode'
       },
       FILE_EXTENSIONS: ['.md', '.markdown'],
       SEARCH_DEBOUNCE_MS: 300,
@@ -772,7 +897,12 @@
       sidebarOverlay: document.getElementById('sidebarOverlay'),
       tocToggle: document.getElementById('tocToggle'),
       tocPanel: document.getElementById('tocPanel'),
-      tocList: document.getElementById('tocList')
+      tocList: document.getElementById('tocList'),
+      searchFilenameBtn: document.getElementById('searchFilenameBtn'),
+      searchContentBtn: document.getElementById('searchContentBtn'),
+      searchResults: document.getElementById('searchResults'),
+      breadcrumbNav: document.getElementById('breadcrumbNav'),
+      recentFilesList: document.getElementById('recentFilesList')
     };
 
     // ============================================================================
@@ -784,6 +914,9 @@
     let folderState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FOLDER_STATE) || '{}');
     let searchDebounceTimer = null;
     let allFileNodes = [];
+    let searchMode = localStorage.getItem(CONFIG.STORAGE_KEYS.SEARCH_MODE) || 'filename';
+    let recentFiles = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.RECENT_FILES) || '[]');
+    let fileContentsCache = new Map(); // Cache file contents for search
 
     /**
      * Saves folder open/closed state to localStorage
@@ -983,6 +1116,270 @@
      */
     function toggleTOC() {
       DOM.tocPanel.classList.toggle('show');
+    }
+
+    /**
+     * Sets search mode (filename or content)
+     * @param {string} mode - 'filename' or 'content'
+     */
+    function setSearchMode(mode) {
+      searchMode = mode;
+      localStorage.setItem(CONFIG.STORAGE_KEYS.SEARCH_MODE, mode);
+
+      DOM.searchFilenameBtn.classList.toggle('active', mode === 'filename');
+      DOM.searchContentBtn.classList.toggle('active', mode === 'content');
+
+      DOM.searchBox.placeholder = mode === 'filename' ? 'Search files' : 'Search in content';
+
+      // Re-run search if there's a query
+      if (DOM.searchBox.value.trim()) {
+        performSearch(DOM.searchBox.value.trim());
+      }
+    }
+
+    /**
+     * Performs full-text search across file contents
+     * @param {string} query - Search query
+     */
+    async function performSearch(query) {
+      if (!query || searchMode === 'filename') {
+        DOM.searchResults.textContent = '';
+        renderTree();
+        return;
+      }
+
+      const lowerQuery = query.toLowerCase();
+      const results = [];
+
+      // Search through all file nodes
+      for (const node of allFileNodes) {
+        try {
+          let content = fileContentsCache.get(node.path);
+
+          if (!content) {
+            // Load and cache file content
+            if (node.file._content !== undefined) {
+              content = node.file._content;
+            } else {
+              content = await node.file.text();
+            }
+            fileContentsCache.set(node.path, content);
+          }
+
+          // Check if content contains query
+          if (content.toLowerCase().includes(lowerQuery)) {
+            // Find first occurrence for preview
+            const index = content.toLowerCase().indexOf(lowerQuery);
+            const start = Math.max(0, index - 30);
+            const end = Math.min(content.length, index + query.length + 30);
+            let snippet = content.substring(start, end);
+
+            if (start > 0) snippet = '...' + snippet;
+            if (end < content.length) snippet = snippet + '...';
+
+            results.push({
+              node,
+              snippet
+            });
+          }
+        } catch (e) {
+          console.error('Error searching file:', node.path, e);
+        }
+      }
+
+      // Display results
+      if (results.length > 0) {
+        DOM.searchResults.textContent = `Found in ${results.length} file${results.length !== 1 ? 's' : ''}`;
+      } else {
+        DOM.searchResults.textContent = 'No matches found';
+      }
+
+      // Filter tree to show only matching files
+      renderTree();
+    }
+
+    /**
+     * Checks if a file node matches the current search query
+     * @param {Object} node - File node
+     * @param {string} query - Search query
+     * @returns {boolean}
+     */
+    async function matchesSearch(node, query) {
+      if (!query) return true;
+
+      const lowerQuery = query.toLowerCase();
+
+      // Filename search
+      if (searchMode === 'filename') {
+        return node.name.toLowerCase().includes(lowerQuery);
+      }
+
+      // Content search - check cache
+      const content = fileContentsCache.get(node.path);
+      if (content) {
+        return content.toLowerCase().includes(lowerQuery);
+      }
+
+      // Default to showing it (will be filtered on actual search)
+      return true;
+    }
+
+    /**
+     * Adds a file to recent files list
+     * @param {string} path - File path
+     */
+    function addToRecentFiles(path) {
+      // Remove if already exists
+      recentFiles = recentFiles.filter(p => p !== path);
+
+      // Add to beginning
+      recentFiles.unshift(path);
+
+      // Keep only last 10
+      recentFiles = recentFiles.slice(0, 10);
+
+      // Save to localStorage
+      try {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.RECENT_FILES, JSON.stringify(recentFiles));
+      } catch (e) {
+        console.warn('Failed to save recent files:', e);
+      }
+
+      renderRecentFiles();
+    }
+
+    /**
+     * Renders recent files list
+     */
+    function renderRecentFiles() {
+      DOM.recentFilesList.innerHTML = '';
+
+      if (recentFiles.length === 0 || !tree) {
+        return;
+      }
+
+      recentFiles.forEach(path => {
+        // Find the node
+        const node = allFileNodes.find(n => n.path === path);
+
+        if (node) {
+          const item = document.createElement('div');
+          item.className = 'recent-file-item';
+          item.textContent = node.name;
+          item.title = path;
+          item.onclick = () => openFile(node);
+          DOM.recentFilesList.appendChild(item);
+        }
+      });
+    }
+
+    /**
+     * Renders breadcrumb navigation for current file
+     * @param {string} path - File path
+     */
+    function renderBreadcrumbs(path) {
+      DOM.breadcrumbNav.innerHTML = '';
+
+      if (!path) {
+        return;
+      }
+
+      const parts = path.split('/');
+      const fileName = parts.pop();
+
+      // Add folder parts
+      parts.forEach((part, index) => {
+        if (index > 0) {
+          const sep = document.createElement('span');
+          sep.className = 'separator';
+          sep.textContent = '/';
+          DOM.breadcrumbNav.appendChild(sep);
+        }
+
+        const link = document.createElement('a');
+        link.textContent = part || 'root';
+        link.onclick = () => {
+          // Filter tree to this folder
+          DOM.searchBox.value = part;
+          renderTree();
+        };
+        DOM.breadcrumbNav.appendChild(link);
+      });
+
+      // Add separator before filename
+      if (parts.length > 0) {
+        const sep = document.createElement('span');
+        sep.className = 'separator';
+        sep.textContent = '/';
+        DOM.breadcrumbNav.appendChild(sep);
+      }
+
+      // Add current file
+      const current = document.createElement('span');
+      current.className = 'current';
+      current.textContent = fileName;
+      DOM.breadcrumbNav.appendChild(current);
+    }
+
+    /**
+     * Highlights search terms in rendered content
+     * @param {string} query - Search query
+     */
+    function highlightSearchTerms(query) {
+      if (!query || searchMode !== 'content') return;
+
+      const textNodes = [];
+      const walker = document.createTreeWalker(
+        DOM.preview,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+      );
+
+      let node;
+      while (node = walker.nextNode()) {
+        if (node.nodeValue.trim()) {
+          textNodes.push(node);
+        }
+      }
+
+      textNodes.forEach(textNode => {
+        const parent = textNode.parentNode;
+        if (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE') return;
+
+        const text = textNode.nodeValue;
+        const lowerText = text.toLowerCase();
+        const lowerQuery = query.toLowerCase();
+
+        if (lowerText.includes(lowerQuery)) {
+          const fragment = document.createDocumentFragment();
+          let lastIndex = 0;
+          let index = lowerText.indexOf(lowerQuery);
+
+          while (index !== -1) {
+            // Add text before match
+            if (index > lastIndex) {
+              fragment.appendChild(document.createTextNode(text.substring(lastIndex, index)));
+            }
+
+            // Add highlighted match
+            const mark = document.createElement('mark');
+            mark.className = 'highlight-search';
+            mark.textContent = text.substring(index, index + query.length);
+            fragment.appendChild(mark);
+
+            lastIndex = index + query.length;
+            index = lowerText.indexOf(lowerQuery, lastIndex);
+          }
+
+          // Add remaining text
+          if (lastIndex < text.length) {
+            fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+          }
+
+          parent.replaceChild(fragment, textNode);
+        }
+      });
     }
 
     /**
@@ -1219,6 +1616,9 @@
 
         const fileCount = markdownFiles.length;
         showToast(`Successfully loaded ${fileCount} file${fileCount !== 1 ? 's' : ''}`, 'success');
+
+        // Render recent files after loading new files
+        renderRecentFiles();
       } catch (e) {
         console.error('Error loading files:', e);
         showError(CONFIG.MESSAGES.LOAD_ERROR);
@@ -1323,6 +1723,12 @@
         selectedPath = node.path;
         DOM.selectedPath.textContent = node.path;
 
+        // Add to recent files
+        addToRecentFiles(node.path);
+
+        // Render breadcrumbs
+        renderBreadcrumbs(node.path);
+
         // Close mobile sidebar when file is selected
         if (window.innerWidth <= 768 && typeof closeMobileSidebar === 'function') {
           closeMobileSidebar();
@@ -1334,6 +1740,9 @@
         } else {
           text = await node.file.text();
         }
+
+        // Cache content for search
+        fileContentsCache.set(node.path, text);
 
         const html = marked.parse(text);
         DOM.preview.innerHTML = html;
@@ -1354,6 +1763,11 @@
 
         // Render math equations
         renderMath();
+
+        // Highlight search terms if in content search mode
+        if (searchMode === 'content' && DOM.searchBox.value.trim()) {
+          highlightSearchTerms(DOM.searchBox.value.trim());
+        }
 
         // Generate Table of Contents
         generateTOC();
@@ -1458,8 +1872,21 @@
     // Debounced search
     DOM.searchBox.oninput = () => {
       clearTimeout(searchDebounceTimer);
-      searchDebounceTimer = setTimeout(() => renderTree(), CONFIG.SEARCH_DEBOUNCE_MS);
+      const query = DOM.searchBox.value.trim();
+
+      if (searchMode === 'content') {
+        searchDebounceTimer = setTimeout(() => performSearch(query), CONFIG.SEARCH_DEBOUNCE_MS);
+      } else {
+        searchDebounceTimer = setTimeout(() => {
+          DOM.searchResults.textContent = '';
+          renderTree();
+        }, CONFIG.SEARCH_DEBOUNCE_MS);
+      }
     };
+
+    // Search mode buttons
+    DOM.searchFilenameBtn.onclick = () => setSearchMode('filename');
+    DOM.searchContentBtn.onclick = () => setSearchMode('content');
 
     DOM.downloadBtn.onclick = () => {
       const blob = new Blob(
@@ -1657,6 +2084,18 @@
           e.preventDefault();
           break;
 
+        case 'r':
+        case 'R':
+          // Focus recent files (cycle through)
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            const recentItems = DOM.recentFilesList.querySelectorAll('.recent-file-item');
+            if (recentItems.length > 0) {
+              recentItems[0].click();
+            }
+          }
+          break;
+
         case '?':
           // Show keyboard shortcuts help
           showKeyboardHelp();
@@ -1698,6 +2137,10 @@
               <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Toggle Table of Contents</td>
             </tr>
             <tr>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);"><code>Ctrl/Cmd + R</code></td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--md-sys-color-outline);">Open most recent file</td>
+            </tr>
+            <tr>
               <td style="padding:8px 12px;"><code>?</code></td>
               <td style="padding:8px 12px;">Show this help</td>
             </tr>
@@ -1733,6 +2176,12 @@
         securityLevel: 'loose'
       });
     }
+
+    // Initialize search mode
+    setSearchMode(searchMode);
+
+    // Render recent files
+    renderRecentFiles();
   </script>
 </body>
 </html>
