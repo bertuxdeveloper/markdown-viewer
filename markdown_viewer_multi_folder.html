@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Viewer (Material Design)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/github.min.css">
+  <style>
+    :root {
+      --md-sys-color-primary: #1976d2;
+      --md-sys-color-surface: #ffffff;
+      --md-sys-color-on-surface: #202124;
+      --md-sys-color-outline: #dadce0;
+      --md-sys-color-background: #f8f9fa;
+      --md-sys-color-hover: #e3f2fd;
+      --md-sys-color-code-bg: #f5f5f5;
+      --md-sys-color-error-bg: #ffebee;
+      --md-sys-color-error-text: #d32f2f;
+    }
+    [data-theme="dark"] {
+      --md-sys-color-primary: #64b5f6;
+      --md-sys-color-surface: #1e1e1e;
+      --md-sys-color-on-surface: #e0e0e0;
+      --md-sys-color-outline: #3e3e3e;
+      --md-sys-color-background: #121212;
+      --md-sys-color-hover: #1a237e;
+      --md-sys-color-code-bg: #2d2d2d;
+      --md-sys-color-error-bg: #3e1f1f;
+      --md-sys-color-error-text: #ef5350;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: var(--md-sys-color-background);
+      color: var(--md-sys-color-on-surface);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    header {
+      background: var(--md-sys-color-surface);
+      border-bottom: 1px solid var(--md-sys-color-outline);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      font-weight: 500;
+      font-size: 20px;
+      color: var(--md-sys-color-primary);
+      margin: 0;
+    }
+    button {
+      background: var(--md-sys-color-primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      background: #1565c0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    aside {
+      width: 320px;
+      border-right: 1px solid var(--md-sys-color-outline);
+      background: var(--md-sys-color-surface);
+      padding: 16px;
+      overflow-y: auto;
+    }
+    section {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      background: var(--md-sys-color-background);
+    }
+    footer {
+      border-top: 1px solid var(--md-sys-color-outline);
+      text-align: center;
+      padding: 10px 20px;
+      font-size: 13px;
+      color: #5f6368;
+      background: var(--md-sys-color-surface);
+    }
+    input[type="search"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--md-sys-color-outline);
+      border-radius: 4px;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    #fileTree {
+      font-size: 14px;
+      line-height: 1.6;
+      user-select: none;
+    }
+    #fileTree details {
+      position: relative;
+      margin-left: 8px;
+      padding-left: 12px;
+      border-left: 1px solid rgba(0,0,0,0.08);
+    }
+    #fileTree details summary {
+      list-style: none;
+      position: relative;
+      padding-left: 20px;
+      cursor: pointer;
+    }
+    #fileTree details summary::before {
+      content: "📁";
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    #fileTree .file {
+      margin-left: 28px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    #fileTree .file::before {
+      content: "📄";
+      font-size: 13px;
+      opacity: 0.7;
+    }
+    #fileTree details[open] > summary::before {
+      content: "📂";
+    }
+    #fileTree summary:hover,
+    #fileTree .file:hover {
+      background: rgba(25, 118, 210, 0.08);
+    }
+    #fileTree .selected {
+      background: var(--md-sys-color-primary);
+      color: white;
+    }
+    #preview {
+      line-height: 1.7;
+      background: var(--md-sys-color-surface);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    #preview pre {
+      background: var(--md-sys-color-code-bg);
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      position: relative;
+      font-size: 14px;
+    }
+    #preview code {
+      font-family: 'Roboto Mono', monospace;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: var(--md-sys-color-primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      opacity: 0;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    pre:hover .copy-btn { opacity: 1; }
+    .copy-btn.copied::after {
+      content: 'Copied!';
+      position: absolute;
+      right: 0;
+      top: -24px;
+      background: #333;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      opacity: 0;
+      animation: fadeInOut 1.5s forwards;
+    }
+    @keyframes fadeInOut {
+      0% {opacity: 0;}
+      10% {opacity: 1;}
+      90% {opacity: 1;}
+      100% {opacity: 0;}
+    }
+    #preview table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 16px 0;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    #preview th, #preview td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--md-sys-color-outline);
+      text-align: left;
+    }
+    #preview th {
+      background: var(--md-sys-color-hover);
+      font-weight: 500;
+    }
+    #preview tr:hover td {
+      background: #f6f9ff;
+    }
+    #themeToggle {
+      background: transparent;
+      color: var(--md-sys-color-on-surface);
+      padding: 8px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #themeToggle:hover {
+      background: var(--md-sys-color-hover);
+    }
+    .drag-over {
+      background: var(--md-sys-color-hover) !important;
+      border: 2px dashed var(--md-sys-color-primary) !important;
+      opacity: 0.8;
+    }
+    .drop-zone-hint {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+      color: var(--md-sys-color-primary);
+      font-size: 18px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    body.dragging .drop-zone-hint {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Markdown Viewer</h1>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button id="themeToggle" title="Toggle dark mode">🌙</button>
+      <label><input id="folderInput" type="file" webkitdirectory multiple hidden><button id="folderBtn">Folder</button></label>
+      <label><input id="zipInput" type="file" accept=".zip" hidden><button id="zipBtn">Zip</button></label>
+      <button id="clearBtn">Clear</button>
+    </div>
+  </header>
+  <main>
+    <aside>
+      <input id="searchBox" type="search" placeholder="Search files">
+      <div id="fileTree"></div>
+    </aside>
+    <section id="dropZone" style="position:relative;">
+      <div class="drop-zone-hint">📁 Drop folder or ZIP file here</div>
+      <div style="max-width:900px;margin:0 auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div id="selectedPath" style="font-size:14px;color:#5f6368;">No file selected</div>
+          <button id="downloadBtn">Download HTML</button>
+        </div>
+        <article id="preview">Select a markdown file to preview.</article>
+      </div>
+    </section>
+  </main>
+  <footer>Markdown rendering by marked.js • Code highlighting by highlight.js • Zip extraction by JSZip</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js/lib/common/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip/dist/jszip.min.js"></script>
+  <script>
+    // ============================================================================
+    // CONSTANTS & CONFIGURATION
+    // ============================================================================
+    const CONFIG = {
+      STORAGE_KEYS: {
+        FOLDER_STATE: 'mdviewer_folder_state',
+        THEME: 'mdviewer_theme'
+      },
+      FILE_EXTENSIONS: ['.md', '.markdown'],
+      SEARCH_DEBOUNCE_MS: 300,
+      CSS_CLASSES: {
+        FILE: 'file',
+        SELECTED: 'selected',
+        COPY_BTN: 'copy-btn',
+        COPIED: 'copied'
+      },
+      MESSAGES: {
+        NO_FILE: 'No file selected',
+        NO_FILES_LOADED: 'No files loaded.',
+        SELECT_FILE: 'Select a markdown file to preview.',
+        LOAD_ERROR: 'Error loading files. Please try again.',
+        ZIP_ERROR: 'Error processing ZIP file. Please ensure it\'s a valid ZIP.',
+        FILE_READ_ERROR: 'Error reading file content.'
+      }
+    };
+
+    // ============================================================================
+    // DOM REFERENCES
+    // ============================================================================
+    const DOM = {
+      folderInput: document.getElementById('folderInput'),
+      zipInput: document.getElementById('zipInput'),
+      folderBtn: document.getElementById('folderBtn'),
+      zipBtn: document.getElementById('zipBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      searchBox: document.getElementById('searchBox'),
+      fileTree: document.getElementById('fileTree'),
+      preview: document.getElementById('preview'),
+      selectedPath: document.getElementById('selectedPath'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      themeToggle: document.getElementById('themeToggle'),
+      dropZone: document.getElementById('dropZone')
+    };
+
+    // ============================================================================
+    // STATE MANAGEMENT
+    // ============================================================================
+    let tree = null;
+    let selectedPath = null;
+    let folderState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FOLDER_STATE) || '{}');
+    let searchDebounceTimer = null;
+
+    /**
+     * Saves folder open/closed state to localStorage
+     */
+    function saveFolderState() {
+      try {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.FOLDER_STATE, JSON.stringify(folderState));
+      } catch (e) {
+        console.warn('Failed to save folder state:', e);
+      }
+    }
+
+    // ============================================================================
+    // UTILITY FUNCTIONS
+    // ============================================================================
+
+    /**
+     * Checks if a file has a supported markdown extension
+     * @param {string} path - File path
+     * @returns {boolean}
+     */
+    function isMarkdownFile(path) {
+      return CONFIG.FILE_EXTENSIONS.some(ext => path.toLowerCase().endsWith(ext));
+    }
+
+    /**
+     * Shows an error message to the user
+     * @param {string} message - Error message to display
+     */
+    function showError(message) {
+      DOM.preview.innerHTML = `<div style="color:var(--md-sys-color-error-text);padding:20px;background:var(--md-sys-color-error-bg);border-radius:8px;">${message}</div>`;
+    }
+
+    /**
+     * Gets the current theme from localStorage or system preference
+     * @returns {string} 'light' or 'dark'
+     */
+    function getTheme() {
+      const stored = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME);
+      if (stored) return stored;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    /**
+     * Applies the theme to the document
+     * @param {string} theme - 'light' or 'dark'
+     */
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      DOM.themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+      DOM.themeToggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+      try {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, theme);
+      } catch (e) {
+        console.warn('Failed to save theme preference:', e);
+      }
+    }
+
+    /**
+     * Toggles between light and dark themes
+     */
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(newTheme);
+    }
+
+    /**
+     * Handles dropped files from drag and drop
+     * @param {DataTransfer} dataTransfer - DataTransfer object from drop event
+     */
+    async function handleDroppedFiles(dataTransfer) {
+      const items = Array.from(dataTransfer.items);
+      const files = [];
+
+      // Process all dropped items
+      for (const item of items) {
+        if (item.kind === 'file') {
+          const file = item.getAsFile();
+
+          // Check if it's a ZIP file
+          if (file.name.toLowerCase().endsWith('.zip')) {
+            try {
+              const zip = await JSZip.loadAsync(await file.arrayBuffer());
+              await Promise.all(
+                Object.keys(zip.files).map(async path => {
+                  const entry = zip.files[path];
+                  if (!entry.dir && isMarkdownFile(path)) {
+                    const content = await entry.async('string');
+                    files.push({
+                      path,
+                      file: { _content: content, name: path.split('/').pop() }
+                    });
+                  }
+                })
+              );
+            } catch (e) {
+              console.error('Error processing dropped ZIP:', e);
+              showError(CONFIG.MESSAGES.ZIP_ERROR);
+              return;
+            }
+          } else if (isMarkdownFile(file.name)) {
+            // Single markdown file
+            files.push({ path: file.name, file: file });
+          }
+        }
+      }
+
+      // Also handle files from the files array (for folder drops)
+      const filesList = Array.from(dataTransfer.files);
+      for (const file of filesList) {
+        if (isMarkdownFile(file.name) && !files.some(f => f.file === file)) {
+          const path = file.webkitRelativePath || file.name;
+          files.push({ path, file });
+        }
+      }
+
+      if (files.length > 0) {
+        loadFiles(files);
+      } else {
+        showError('No markdown files found in dropped items.');
+      }
+    }
+
+    // ============================================================================
+    // FILE TREE MANAGEMENT
+    // ============================================================================
+
+    /**
+     * Builds a hierarchical tree structure from flat file list
+     * @param {Array} files - Array of {path, file} objects
+     * @returns {Object} Root node of the tree
+     */
+    function buildTree(files) {
+      const root = { name: 'root', path: '', children: [] };
+
+      const ensureFolder = (parts) => {
+        let node = root;
+        for (const p of parts) {
+          if (!p) continue;
+          let c = node.children.find(x => x.name === p && x.children);
+          if (!c) {
+            c = { name: p, path: node.path ? node.path + '/' + p : p, children: [] };
+            node.children.push(c);
+          }
+          node = c;
+        }
+        return node;
+      };
+
+      for (const f of files) {
+        const parts = f.path.split('/');
+        const fileName = parts.pop();
+        const parent = ensureFolder(parts);
+        parent.children.push({ name: fileName, path: f.path, file: f.file });
+      }
+
+      return root;
+    }
+
+    /**
+     * Merges a source tree into a target tree
+     * @param {Object} target - Target tree node
+     * @param {Object} source - Source tree node
+     */
+    function mergeTrees(target, source) {
+      for (const child of source.children) {
+        const existing = target.children.find(c => c.name === child.name);
+        if (existing && child.children && existing.children) {
+          mergeTrees(existing, child);
+        } else if (!existing) {
+          target.children.push(child);
+        }
+      }
+    }
+
+    /**
+     * Loads files and updates the tree
+     * @param {Array} files - Array of file objects
+     */
+    function loadFiles(files) {
+      try {
+        const markdownFiles = files.filter(f => isMarkdownFile(f.path));
+        if (markdownFiles.length === 0) {
+          showError('No markdown files found.');
+          return;
+        }
+
+        const newTree = buildTree(markdownFiles);
+        if (!tree) {
+          tree = newTree;
+        } else {
+          mergeTrees(tree, newTree);
+        }
+        renderTree();
+      } catch (e) {
+        console.error('Error loading files:', e);
+        showError(CONFIG.MESSAGES.LOAD_ERROR);
+      }
+    }
+
+    // ============================================================================
+    // RENDERING
+    // ============================================================================
+
+    /**
+     * Renders the entire file tree
+     */
+    function renderTree() {
+      DOM.fileTree.innerHTML = '';
+      if (!tree) {
+        DOM.fileTree.textContent = CONFIG.MESSAGES.NO_FILES_LOADED;
+        return;
+      }
+      DOM.fileTree.appendChild(renderNode(tree));
+    }
+
+    /**
+     * Recursively renders a tree node with search filtering
+     * @param {Object} node - Tree node to render
+     * @returns {HTMLElement|null}
+     */
+    function renderNode(node) {
+      const q = DOM.searchBox.value.trim().toLowerCase();
+      const matches = n => n.name.toLowerCase().includes(q);
+
+      if (node.children) {
+        if (q && !node.children.some(c => containsSearch(c, q))) {
+          return document.createTextNode('');
+        }
+
+        const details = document.createElement('details');
+        const isOpen = folderState[node.path] ?? true;
+        details.open = isOpen;
+
+        const summary = document.createElement('summary');
+        summary.textContent = node.name || '/';
+        details.appendChild(summary);
+
+        details.addEventListener('toggle', () => {
+          folderState[node.path] = details.open;
+          saveFolderState();
+        });
+
+        const div = document.createElement('div');
+        node.children.forEach(c => {
+          const el = renderNode(c);
+          if (el) div.appendChild(el);
+        });
+        details.appendChild(div);
+        return details;
+      } else {
+        if (q && !matches(node)) return null;
+
+        const div = document.createElement('div');
+        div.className = CONFIG.CSS_CLASSES.FILE + (selectedPath === node.path ? ' ' + CONFIG.CSS_CLASSES.SELECTED : '');
+        div.textContent = node.name;
+        div.onclick = () => openFile(node);
+        return div;
+      }
+    }
+
+    /**
+     * Checks if a node or its children match the search query
+     * @param {Object} node - Tree node
+     * @param {string} q - Search query
+     * @returns {boolean}
+     */
+    function containsSearch(node, q) {
+      if (!q) return true;
+      if (!node.children) return node.name.toLowerCase().includes(q);
+      return node.children.some(c => containsSearch(c, q));
+    }
+
+    /**
+     * Opens and renders a markdown file
+     * @param {Object} node - File node
+     */
+    async function openFile(node) {
+      try {
+        selectedPath = node.path;
+        DOM.selectedPath.textContent = node.path;
+
+        let text = '';
+        if (node.file._content !== undefined) {
+          text = node.file._content;
+        } else {
+          text = await node.file.text();
+        }
+
+        const html = marked.parse(text);
+        DOM.preview.innerHTML = html;
+
+        // Apply syntax highlighting
+        if (window.hljs && window.hljs.highlightAll) {
+          window.hljs.highlightAll();
+        }
+
+        // Add IDs to headings
+        DOM.preview.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(h => {
+          const id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          h.id = id;
+        });
+
+        // Handle anchor links
+        DOM.preview.querySelectorAll('a[href^="#"]').forEach(a => {
+          a.addEventListener('click', e => {
+            e.preventDefault();
+            const id = a.getAttribute('href').substring(1);
+            const target = DOM.preview.querySelector(`#${CSS.escape(id)}`);
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              history.replaceState(null, '', `#${id}`);
+            }
+          });
+        });
+
+        // Add copy buttons to code blocks
+        DOM.preview.querySelectorAll('pre code').forEach(codeBlock => {
+          const pre = codeBlock.parentElement;
+          const btn = document.createElement('button');
+          btn.textContent = 'Copy';
+          btn.className = CONFIG.CSS_CLASSES.COPY_BTN;
+          btn.onclick = () => {
+            navigator.clipboard.writeText(codeBlock.textContent.trim());
+            btn.classList.add(CONFIG.CSS_CLASSES.COPIED);
+            setTimeout(() => btn.classList.remove(CONFIG.CSS_CLASSES.COPIED), 1500);
+          };
+          pre.appendChild(btn);
+        });
+
+        renderTree();
+      } catch (e) {
+        console.error('Error opening file:', e);
+        showError(CONFIG.MESSAGES.FILE_READ_ERROR);
+      }
+    }
+
+    // ============================================================================
+    // EVENT HANDLERS
+    // ============================================================================
+
+    DOM.folderBtn.onclick = () => DOM.folderInput.click();
+    DOM.zipBtn.onclick = () => DOM.zipInput.click();
+    DOM.themeToggle.onclick = toggleTheme;
+
+    DOM.clearBtn.onclick = () => {
+      tree = null;
+      DOM.fileTree.innerHTML = '';
+      DOM.preview.innerHTML = CONFIG.MESSAGES.SELECT_FILE;
+      DOM.selectedPath.textContent = CONFIG.MESSAGES.NO_FILE;
+    };
+
+    DOM.folderInput.onchange = e => {
+      const files = Array.from(e.target.files).map(f => ({
+        path: f.webkitRelativePath || f.name,
+        file: f
+      }));
+      loadFiles(files);
+    };
+
+    DOM.zipInput.onchange = async e => {
+      const zipFile = e.target.files[0];
+      if (!zipFile) return;
+
+      try {
+        const zip = await JSZip.loadAsync(await zipFile.arrayBuffer());
+        const files = [];
+
+        await Promise.all(
+          Object.keys(zip.files).map(async path => {
+            const entry = zip.files[path];
+            if (!entry.dir && isMarkdownFile(path)) {
+              const content = await entry.async('string');
+              files.push({
+                path,
+                file: { _content: content, name: path.split('/').pop() }
+              });
+            }
+          })
+        );
+
+        loadFiles(files);
+      } catch (e) {
+        console.error('Error processing ZIP:', e);
+        showError(CONFIG.MESSAGES.ZIP_ERROR);
+      }
+    };
+
+    // Debounced search
+    DOM.searchBox.oninput = () => {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => renderTree(), CONFIG.SEARCH_DEBOUNCE_MS);
+    };
+
+    DOM.downloadBtn.onclick = () => {
+      const blob = new Blob(
+        [`<!doctype html><meta charset='utf-8'><link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/github.min.css'><div>${DOM.preview.innerHTML}</div>`],
+        { type: 'text/html' }
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (selectedPath ? selectedPath.replace(/\//g, '_') : 'markdown') + '.html';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Drag and drop support
+    let dragCounter = 0;
+
+    document.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      dragCounter++;
+      document.body.classList.add('dragging');
+    });
+
+    document.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dragCounter--;
+      if (dragCounter === 0) {
+        document.body.classList.remove('dragging');
+      }
+    });
+
+    document.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    });
+
+    document.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dragCounter = 0;
+      document.body.classList.remove('dragging');
+      DOM.dropZone.classList.remove('drag-over');
+
+      try {
+        await handleDroppedFiles(e.dataTransfer);
+      } catch (error) {
+        console.error('Error handling dropped files:', error);
+        showError(CONFIG.MESSAGES.LOAD_ERROR);
+      }
+    });
+
+    DOM.dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      DOM.dropZone.classList.add('drag-over');
+    });
+
+    DOM.dropZone.addEventListener('dragleave', (e) => {
+      if (e.target === DOM.dropZone) {
+        DOM.dropZone.classList.remove('drag-over');
+      }
+    });
+
+    // ============================================================================
+    // INITIALIZATION
+    // ============================================================================
+
+    // Initialize theme on page load
+    applyTheme(getTheme());
+  </script>
+</body>
+</html>
