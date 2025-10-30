@@ -187,13 +187,57 @@
       color: #5f6368;
       background: var(--md-sys-color-surface);
     }
+    .search-container {
+      position: relative;
+      margin-bottom: 12px;
+    }
     input[type="search"] {
       width: 100%;
-      padding: 10px 12px;
+      padding: 10px 32px 10px 12px;
       border: 1px solid var(--md-sys-color-outline);
       border-radius: 4px;
       font-size: 14px;
-      margin-bottom: 12px;
+    }
+    input[type="search"]:focus {
+      outline: 2px solid var(--md-sys-color-primary);
+      outline-offset: -1px;
+    }
+    .search-clear {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--md-sys-color-on-surface);
+      opacity: 0.5;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 16px;
+      display: none;
+      transition: opacity 0.2s;
+    }
+    .search-clear:hover {
+      opacity: 1;
+    }
+    .search-clear.show {
+      display: block;
+    }
+    .search-loading {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+    .search-loading.show {
+      display: block;
+    }
+    @keyframes spin {
+      from { transform: translateY(-50%) rotate(0deg); }
+      to { transform: translateY(-50%) rotate(360deg); }
     }
     #fileTree {
       font-size: 14px;
@@ -642,6 +686,64 @@
       margin-top: 16px;
       padding-top: 16px;
       border-top: 1px solid var(--md-sys-color-outline);
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 4px 0;
+      margin-bottom: 8px;
+      user-select: none;
+      transition: background 0.2s;
+      border-radius: 4px;
+    }
+    .section-header:hover {
+      background: var(--md-sys-color-hover);
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.7;
+    }
+    .section-count {
+      background: var(--md-sys-color-primary);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .section-toggle {
+      font-size: 10px;
+      opacity: 0.5;
+      transition: transform 0.2s;
+    }
+    .section-toggle.collapsed {
+      transform: rotate(-90deg);
+    }
+    .section-content {
+      max-height: 500px;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+    .section-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+    .empty-state {
+      font-size: 12px;
+      color: var(--md-sys-color-on-surface);
+      opacity: 0.5;
+      padding: 8px;
+      text-align: center;
+      font-style: italic;
     }
     #favoritesSection h4 {
       margin: 0 0 8px 0;
@@ -1281,15 +1383,35 @@
         <button id="searchFilenameBtn" class="active" title="Search by filename">Name</button>
         <button id="searchContentBtn" title="Search in file contents">Content</button>
       </div>
-      <input id="searchBox" type="search" placeholder="Search files">
+      <div class="search-container">
+        <input id="searchBox" type="search" placeholder="Search files (Press /)">
+        <button class="search-clear" id="searchClear" title="Clear search" aria-label="Clear search">✕</button>
+        <div class="search-loading" id="searchLoading">⏳</div>
+      </div>
       <div id="searchResults" class="search-result"></div>
       <div id="favoritesSection">
-        <h4>Favorites</h4>
-        <div id="favoritesList"></div>
+        <div class="section-header" id="favoritesHeader">
+          <div class="section-title">
+            <span>📌 Favorites</span>
+            <span class="section-count" id="favoritesCount">0</span>
+          </div>
+          <span class="section-toggle" id="favoritesToggle">▼</span>
+        </div>
+        <div class="section-content" id="favoritesContent">
+          <div id="favoritesList"></div>
+        </div>
       </div>
       <div id="recentFiles">
-        <h4>Recent Files</h4>
-        <div id="recentFilesList"></div>
+        <div class="section-header" id="recentHeader">
+          <div class="section-title">
+            <span>🕐 Recent Files</span>
+            <span class="section-count" id="recentCount">0</span>
+          </div>
+          <span class="section-toggle" id="recentToggle">▼</span>
+        </div>
+        <div class="section-content" id="recentContent">
+          <div id="recentFilesList"></div>
+        </div>
       </div>
       <div id="fileTree"></div>
       <div class="resize-handle" id="resizeHandle"></div>
@@ -1556,7 +1678,9 @@
         LINE_HEIGHT: 'mdviewer_line_height',
         PREVIEW_WIDTH: 'mdviewer_preview_width',
         CODE_THEME: 'mdviewer_code_theme',
-        THEME_PRESET: 'mdviewer_theme_preset'
+        THEME_PRESET: 'mdviewer_theme_preset',
+        FAVORITES_COLLAPSED: 'mdviewer_favorites_collapsed',
+        RECENT_COLLAPSED: 'mdviewer_recent_collapsed'
       },
       FILE_EXTENSIONS: ['.md', '.markdown'],
       SEARCH_DEBOUNCE_MS: 300,
@@ -1631,6 +1755,16 @@
       searchFilenameBtn: document.getElementById('searchFilenameBtn'),
       searchContentBtn: document.getElementById('searchContentBtn'),
       searchResults: document.getElementById('searchResults'),
+      searchClear: document.getElementById('searchClear'),
+      searchLoading: document.getElementById('searchLoading'),
+      favoritesHeader: document.getElementById('favoritesHeader'),
+      favoritesToggle: document.getElementById('favoritesToggle'),
+      favoritesCount: document.getElementById('favoritesCount'),
+      favoritesContent: document.getElementById('favoritesContent'),
+      recentHeader: document.getElementById('recentHeader'),
+      recentToggle: document.getElementById('recentToggle'),
+      recentCount: document.getElementById('recentCount'),
+      recentContent: document.getElementById('recentContent'),
       breadcrumbNav: document.getElementById('breadcrumbNav'),
       recentFilesList: document.getElementById('recentFilesList'),
       favoritesList: document.getElementById('favoritesList'),
@@ -2086,6 +2220,7 @@
       if (!query || searchMode === 'filename') {
         searchInProgress = false;
         DOM.searchResults.textContent = '';
+        DOM.searchLoading.classList.remove('show');
         renderTree();
         return;
       }
@@ -2102,6 +2237,7 @@
       const batchSize = CONFIG.PERFORMANCE.SEARCH_BATCH_SIZE;
 
       DOM.searchResults.textContent = `Searching...`;
+      DOM.searchLoading.classList.add('show');
 
       try {
         // Check how many files are already cached
@@ -2215,6 +2351,7 @@
         DOM.searchResults.textContent = 'Search error occurred';
       } finally {
         searchInProgress = false;
+        DOM.searchLoading.classList.remove('show');
         // Filter tree to show only matching files
         renderTree();
       }
@@ -2276,11 +2413,22 @@
     function renderRecentFiles() {
       DOM.recentFilesList.innerHTML = '';
 
-      if (recentFiles.length === 0 || !tree) {
+      // Filter to only valid files that exist in tree
+      const validRecentFiles = recentFiles.filter(path => allFileNodes.find(n => n.path === path));
+
+      // Update count
+      DOM.recentCount.textContent = validRecentFiles.length;
+
+      if (validRecentFiles.length === 0 || !tree) {
+        // Show empty state
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.textContent = 'Recently opened files will appear here';
+        DOM.recentFilesList.appendChild(emptyState);
         return;
       }
 
-      recentFiles.forEach(path => {
+      validRecentFiles.forEach(path => {
         // Find the node
         const node = allFileNodes.find(n => n.path === path);
 
@@ -2376,11 +2524,20 @@
 
       DOM.favoritesList.innerHTML = '';
 
-      if (favorites.length === 0 || !tree) {
+      // Update count
+      const validFavorites = favorites.filter(path => allFileNodes.find(n => n.path === path));
+      DOM.favoritesCount.textContent = validFavorites.length;
+
+      if (validFavorites.length === 0 || !tree) {
+        // Show empty state
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.textContent = 'No favorites yet. Click ⭐ to add files.';
+        DOM.favoritesList.appendChild(emptyState);
         return;
       }
 
-      favorites.forEach(path => {
+      validFavorites.forEach(path => {
         const node = allFileNodes.find(n => n.path === path);
 
         if (node) {
@@ -3930,6 +4087,71 @@ ${content}`;
         DOM.tocPanel.classList.remove('show');
       }
     });
+
+    // ============================================================================
+    // COLLAPSIBLE SIDEBAR SECTIONS
+    // ============================================================================
+
+    /**
+     * Toggle section collapsed state
+     * @param {string} sectionKey - Storage key for the section
+     * @param {HTMLElement} content - Content element
+     * @param {HTMLElement} toggle - Toggle arrow element
+     */
+    function toggleSection(sectionKey, content, toggle) {
+      const isCollapsed = content.classList.toggle('collapsed');
+      toggle.classList.toggle('collapsed', isCollapsed);
+
+      try {
+        localStorage.setItem(sectionKey, isCollapsed ? 'true' : 'false');
+      } catch (e) {
+        console.warn('Failed to save section state:', e);
+      }
+    }
+
+    // Initialize section states from localStorage
+    const favoritesCollapsed = localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES_COLLAPSED) === 'true';
+    const recentCollapsed = localStorage.getItem(CONFIG.STORAGE_KEYS.RECENT_COLLAPSED) === 'true';
+
+    if (favoritesCollapsed) {
+      DOM.favoritesContent.classList.add('collapsed');
+      DOM.favoritesToggle.classList.add('collapsed');
+    }
+
+    if (recentCollapsed) {
+      DOM.recentContent.classList.add('collapsed');
+      DOM.recentToggle.classList.add('collapsed');
+    }
+
+    // Favorites section toggle
+    DOM.favoritesHeader.onclick = () => {
+      toggleSection(CONFIG.STORAGE_KEYS.FAVORITES_COLLAPSED, DOM.favoritesContent, DOM.favoritesToggle);
+    };
+
+    // Recent files section toggle
+    DOM.recentHeader.onclick = () => {
+      toggleSection(CONFIG.STORAGE_KEYS.RECENT_COLLAPSED, DOM.recentContent, DOM.recentToggle);
+    };
+
+    // ============================================================================
+    // SEARCH ENHANCEMENTS
+    // ============================================================================
+
+    // Search clear button
+    DOM.searchBox.addEventListener('input', () => {
+      if (DOM.searchBox.value.trim()) {
+        DOM.searchClear.classList.add('show');
+      } else {
+        DOM.searchClear.classList.remove('show');
+      }
+    });
+
+    DOM.searchClear.onclick = () => {
+      DOM.searchBox.value = '';
+      DOM.searchClear.classList.remove('show');
+      DOM.searchBox.dispatchEvent(new Event('input'));
+      DOM.searchBox.focus();
+    };
 
     // ============================================================================
     // RESIZABLE SIDEBAR
