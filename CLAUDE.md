@@ -44,6 +44,12 @@ This is a standalone, single-file HTML application that provides a feature-rich 
 - `exportAsHTML()`: Exports current document as standalone HTML with theme preservation
 - `exportAsPDF()`: Exports current document as PDF using jsPDF and html2canvas
 - `exportAsMarkdown()`: Exports original markdown with YAML frontmatter annotations
+- `copyHTML()`: Copies rendered HTML to clipboard
+- `copyMarkdown()`: Copies original markdown source to clipboard
+- `copyPlainText()`: Copies plain text version to clipboard
+- `printDocument()`: Prints current document with print-optimized layout
+- `openBatchExport()`: Opens batch export modal for exporting multiple files
+- `performBatchExport()`: Executes batch export with progress tracking
 - `generateTOC()`: Auto-generates table of contents from headings
 - `applyThemePreset(name)`: Applies one of 6 predefined theme presets
 
@@ -120,10 +126,16 @@ All dependencies are loaded at runtime; no package manager or build tools are us
 - **Code Highlighting**: 5 code highlighting themes available
 - **Mobile Responsive**: Full mobile support with hamburger menu
 
-### Export Options
+### Export & Sharing Options
 - **HTML Export**: Standalone HTML file with embedded theme colors and styles
 - **PDF Export**: High-quality PDF with proper page breaks
 - **Markdown Export**: Original source with YAML frontmatter metadata
+- **Print**: Print-optimized layout with proper page breaks
+- **Copy to Clipboard**: Copy as HTML, Markdown, or plain text
+- **Batch Export**: Export multiple files at once as individual files or ZIP archive
+  - Export selected files as HTML or Markdown
+  - Create ZIP archives with all selected files
+  - Progress indicator for large batches
 
 ### Advanced Markdown
 - **Diagrams**: Full Mermaid.js support for flowcharts, sequence diagrams, etc.

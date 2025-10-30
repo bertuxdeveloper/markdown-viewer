@@ -1018,6 +1018,152 @@
       display: block;
       margin-top: 2px;
     }
+    /* Batch export modal */
+    #batchExportModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10002;
+      backdrop-filter: blur(4px);
+    }
+    #batchExportModal.show {
+      display: flex;
+    }
+    .batch-export-content {
+      background: var(--md-sys-color-surface);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .batch-export-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--md-sys-color-outline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--md-sys-color-surface);
+      z-index: 1;
+    }
+    .batch-export-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+    }
+    .batch-export-body {
+      padding: 24px;
+    }
+    .batch-file-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--md-sys-color-outline);
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    .batch-file-item {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--md-sys-color-outline);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .batch-file-item:last-child {
+      border-bottom: none;
+    }
+    .batch-file-item input[type="checkbox"] {
+      cursor: pointer;
+    }
+    .batch-file-item label {
+      flex: 1;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .batch-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+    .batch-actions button {
+      padding: 8px 16px;
+    }
+    .batch-progress {
+      display: none;
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--md-sys-color-background);
+      border-radius: 4px;
+    }
+    .batch-progress.show {
+      display: block;
+    }
+    .batch-progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--md-sys-color-outline);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .batch-progress-fill {
+      height: 100%;
+      background: var(--md-sys-color-primary);
+      transition: width 0.3s ease;
+    }
+    .batch-progress-text {
+      font-size: 13px;
+      color: var(--md-sys-color-on-surface);
+    }
+    /* Print styles */
+    @media print {
+      header, aside, footer, button, .export-dropdown, #tocToggle, #tocPanel, #breadcrumbNav {
+        display: none !important;
+      }
+      body {
+        background: white;
+        color: black;
+      }
+      main {
+        display: block;
+      }
+      section {
+        padding: 0;
+        overflow: visible;
+      }
+      #preview {
+        max-width: 100%;
+        padding: 0;
+        box-shadow: none;
+        page-break-inside: avoid;
+      }
+      #preview h1, #preview h2, #preview h3 {
+        page-break-after: avoid;
+      }
+      #preview pre {
+        page-break-inside: avoid;
+        border: 1px solid #ddd;
+      }
+      #preview img {
+        max-width: 100%;
+        page-break-inside: avoid;
+      }
+      #preview table {
+        page-break-inside: avoid;
+      }
+      .mermaid {
+        page-break-inside: avoid;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1070,22 +1216,57 @@
               <div class="export-dropdown-item" data-export="html">
                 <span class="icon">🌐</span>
                 <div class="label">
-                  HTML
+                  Export HTML
                   <div class="description">Standalone HTML file</div>
                 </div>
               </div>
               <div class="export-dropdown-item" data-export="pdf">
                 <span class="icon">📄</span>
                 <div class="label">
-                  PDF
+                  Export PDF
                   <div class="description">Portable document format</div>
                 </div>
               </div>
               <div class="export-dropdown-item" data-export="markdown">
                 <span class="icon">📝</span>
                 <div class="label">
-                  Markdown
+                  Export Markdown
                   <div class="description">Original markdown source</div>
+                </div>
+              </div>
+              <div class="export-dropdown-item" data-export="print">
+                <span class="icon">🖨️</span>
+                <div class="label">
+                  Print
+                  <div class="description">Print current document</div>
+                </div>
+              </div>
+              <div class="export-dropdown-item" data-export="copy-html">
+                <span class="icon">📋</span>
+                <div class="label">
+                  Copy HTML
+                  <div class="description">Copy to clipboard</div>
+                </div>
+              </div>
+              <div class="export-dropdown-item" data-export="copy-markdown">
+                <span class="icon">📋</span>
+                <div class="label">
+                  Copy Markdown
+                  <div class="description">Copy source to clipboard</div>
+                </div>
+              </div>
+              <div class="export-dropdown-item" data-export="copy-text">
+                <span class="icon">📋</span>
+                <div class="label">
+                  Copy Plain Text
+                  <div class="description">Copy as plain text</div>
+                </div>
+              </div>
+              <div class="export-dropdown-item" data-export="batch">
+                <span class="icon">📦</span>
+                <div class="label">
+                  Batch Export
+                  <div class="description">Export multiple files</div>
                 </div>
               </div>
             </div>
@@ -1213,6 +1394,47 @@
     </div>
   </div>
 
+  <!-- Batch Export Modal -->
+  <div id="batchExportModal">
+    <div class="batch-export-content">
+      <div class="batch-export-header">
+        <h2>📦 Batch Export</h2>
+        <button class="settings-close" id="batchExportClose">×</button>
+      </div>
+      <div class="batch-export-body">
+        <div style="margin-bottom:16px;">
+          <label style="font-weight:500;margin-bottom:8px;display:block;">Select files to export:</label>
+          <div style="margin-bottom:12px;">
+            <button id="batchSelectAll" style="padding:4px 12px;font-size:13px;margin-right:8px;">Select All</button>
+            <button id="batchDeselectAll" style="padding:4px 12px;font-size:13px;background:transparent;color:var(--md-sys-color-on-surface);border:1px solid var(--md-sys-color-outline);">Deselect All</button>
+          </div>
+          <div class="batch-file-list" id="batchFileList">
+            <!-- Files will be populated here -->
+          </div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-weight:500;margin-bottom:8px;display:block;">Export format:</label>
+          <select id="batchExportFormat" style="width:100%;padding:8px;border:1px solid var(--md-sys-color-outline);border-radius:4px;font-size:14px;">
+            <option value="html">HTML (Standalone files)</option>
+            <option value="markdown">Markdown (Source files)</option>
+            <option value="zip-html">ZIP Archive (HTML files)</option>
+            <option value="zip-markdown">ZIP Archive (Markdown files)</option>
+          </select>
+        </div>
+        <div class="batch-progress" id="batchProgress">
+          <div class="batch-progress-bar">
+            <div class="batch-progress-fill" id="batchProgressFill" style="width:0%"></div>
+          </div>
+          <div class="batch-progress-text" id="batchProgressText">Processing...</div>
+        </div>
+        <div class="batch-actions">
+          <button id="batchExportCancel" style="background:transparent;color:var(--md-sys-color-on-surface);border:1px solid var(--md-sys-color-outline);">Cancel</button>
+          <button id="batchExportStart">Export</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/highlight.js/lib/common/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip/dist/jszip.min.js"></script>
@@ -1320,7 +1542,18 @@
       lineHeightSelect: document.getElementById('lineHeightSelect'),
       previewWidthSelect: document.getElementById('previewWidthSelect'),
       themeGrid: document.getElementById('themeGrid'),
-      codeThemeSelect: document.getElementById('codeThemeSelect')
+      codeThemeSelect: document.getElementById('codeThemeSelect'),
+      batchExportModal: document.getElementById('batchExportModal'),
+      batchExportClose: document.getElementById('batchExportClose'),
+      batchFileList: document.getElementById('batchFileList'),
+      batchSelectAll: document.getElementById('batchSelectAll'),
+      batchDeselectAll: document.getElementById('batchDeselectAll'),
+      batchExportFormat: document.getElementById('batchExportFormat'),
+      batchProgress: document.getElementById('batchProgress'),
+      batchProgressFill: document.getElementById('batchProgressFill'),
+      batchProgressText: document.getElementById('batchProgressText'),
+      batchExportCancel: document.getElementById('batchExportCancel'),
+      batchExportStart: document.getElementById('batchExportStart')
     };
 
     // ============================================================================
@@ -2287,6 +2520,220 @@ ${content}`;
     }
 
     /**
+     * Copy HTML to clipboard
+     */
+    async function copyHTML() {
+      if (!selectedPath) {
+        showToast('No file selected', 'error');
+        return;
+      }
+
+      try {
+        const htmlContent = DOM.preview.innerHTML;
+        await navigator.clipboard.writeText(htmlContent);
+        showToast('HTML copied to clipboard', 'success');
+      } catch (error) {
+        console.error('Copy HTML error:', error);
+        showToast('Failed to copy HTML', 'error');
+      }
+    }
+
+    /**
+     * Copy Markdown to clipboard
+     */
+    async function copyMarkdown() {
+      if (!selectedPath) {
+        showToast('No file selected', 'error');
+        return;
+      }
+
+      try {
+        const node = allFileNodes.find(n => n.path === selectedPath);
+        if (!node || !node.file) {
+          throw new Error('File not found');
+        }
+
+        const content = await lazyLoadFileContent(node.file);
+        await navigator.clipboard.writeText(content);
+        showToast('Markdown copied to clipboard', 'success');
+      } catch (error) {
+        console.error('Copy Markdown error:', error);
+        showToast('Failed to copy Markdown', 'error');
+      }
+    }
+
+    /**
+     * Copy plain text to clipboard
+     */
+    async function copyPlainText() {
+      if (!selectedPath) {
+        showToast('No file selected', 'error');
+        return;
+      }
+
+      try {
+        const plainText = DOM.preview.innerText;
+        await navigator.clipboard.writeText(plainText);
+        showToast('Plain text copied to clipboard', 'success');
+      } catch (error) {
+        console.error('Copy plain text error:', error);
+        showToast('Failed to copy plain text', 'error');
+      }
+    }
+
+    /**
+     * Print current document
+     */
+    function printDocument() {
+      if (!selectedPath) {
+        showToast('No file selected', 'error');
+        return;
+      }
+
+      window.print();
+    }
+
+    /**
+     * Opens batch export modal
+     */
+    function openBatchExport() {
+      if (!tree || allFileNodes.length === 0) {
+        showToast('No files loaded', 'error');
+        return;
+      }
+
+      // Populate file list
+      DOM.batchFileList.innerHTML = '';
+      allFileNodes.forEach((node, index) => {
+        const item = document.createElement('div');
+        item.className = 'batch-file-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `batch-file-${index}`;
+        checkbox.value = node.path;
+
+        const label = document.createElement('label');
+        label.htmlFor = `batch-file-${index}`;
+        label.textContent = node.path;
+
+        item.appendChild(checkbox);
+        item.appendChild(label);
+        DOM.batchFileList.appendChild(item);
+      });
+
+      DOM.batchExportModal.classList.add('show');
+    }
+
+    /**
+     * Closes batch export modal
+     */
+    function closeBatchExport() {
+      DOM.batchExportModal.classList.remove('show');
+      DOM.batchProgress.classList.remove('show');
+      DOM.batchProgressFill.style.width = '0%';
+    }
+
+    /**
+     * Performs batch export
+     */
+    async function performBatchExport() {
+      const checkboxes = DOM.batchFileList.querySelectorAll('input[type="checkbox"]:checked');
+      const selectedFiles = Array.from(checkboxes).map(cb => {
+        const path = cb.value;
+        return allFileNodes.find(n => n.path === path);
+      }).filter(Boolean);
+
+      if (selectedFiles.length === 0) {
+        showToast('No files selected', 'error');
+        return;
+      }
+
+      const format = DOM.batchExportFormat.value;
+      DOM.batchProgress.classList.add('show');
+      DOM.batchExportStart.disabled = true;
+
+      try {
+        if (format.startsWith('zip-')) {
+          // ZIP export
+          const zip = new JSZip();
+          const exportFormat = format === 'zip-html' ? 'html' : 'markdown';
+
+          for (let i = 0; i < selectedFiles.length; i++) {
+            const node = selectedFiles[i];
+            const progress = ((i + 1) / selectedFiles.length) * 100;
+            DOM.batchProgressFill.style.width = progress + '%';
+            DOM.batchProgressText.textContent = `Processing ${i + 1}/${selectedFiles.length}: ${node.path}`;
+
+            const content = await lazyLoadFileContent(node.file);
+
+            if (exportFormat === 'html') {
+              const html = marked.parse(content);
+              const fullHtml = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>${node.path}</title></head>
+<body>${html}</body></html>`;
+              zip.file(node.path.replace(/\.md$/, '.html'), fullHtml);
+            } else {
+              zip.file(node.path, content);
+            }
+          }
+
+          DOM.batchProgressText.textContent = 'Generating ZIP file...';
+          const blob = await zip.generateAsync({ type: 'blob' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `markdown-export-${Date.now()}.zip`;
+          a.click();
+          URL.revokeObjectURL(url);
+        } else {
+          // Individual file exports
+          for (let i = 0; i < selectedFiles.length; i++) {
+            const node = selectedFiles[i];
+            const progress = ((i + 1) / selectedFiles.length) * 100;
+            DOM.batchProgressFill.style.width = progress + '%';
+            DOM.batchProgressText.textContent = `Exporting ${i + 1}/${selectedFiles.length}: ${node.path}`;
+
+            const content = await lazyLoadFileContent(node.file);
+
+            if (format === 'html') {
+              const html = marked.parse(content);
+              const fullHtml = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>${node.path}</title></head>
+<body>${html}</body></html>`;
+              const blob = new Blob([fullHtml], { type: 'text/html' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = node.path.replace(/\.md$/, '.html');
+              a.click();
+              URL.revokeObjectURL(url);
+            } else {
+              const blob = new Blob([content], { type: 'text/markdown' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = node.path.split('/').pop();
+              a.click();
+              URL.revokeObjectURL(url);
+            }
+
+            // Small delay between downloads
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+
+        showToast(`Successfully exported ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}`, 'success');
+        closeBatchExport();
+      } catch (error) {
+        console.error('Batch export error:', error);
+        showToast('Batch export failed', 'error');
+      } finally {
+        DOM.batchExportStart.disabled = false;
+      }
+    }
+
+    /**
      * Opens settings panel
      */
     function openSettings() {
@@ -3078,6 +3525,22 @@ ${content}`;
       }
     };
 
+    // Batch export modal
+    DOM.batchExportClose.onclick = closeBatchExport;
+    DOM.batchExportCancel.onclick = closeBatchExport;
+    DOM.batchExportModal.onclick = (e) => {
+      if (e.target === DOM.batchExportModal) {
+        closeBatchExport();
+      }
+    };
+    DOM.batchSelectAll.onclick = () => {
+      DOM.batchFileList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+    };
+    DOM.batchDeselectAll.onclick = () => {
+      DOM.batchFileList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    };
+    DOM.batchExportStart.onclick = performBatchExport;
+
     // Font size control
     DOM.fontSizeRange.oninput = (e) => {
       setFontSize(parseInt(e.target.value));
@@ -3126,6 +3589,21 @@ ${content}`;
             break;
           case 'markdown':
             await exportAsMarkdown();
+            break;
+          case 'print':
+            printDocument();
+            break;
+          case 'copy-html':
+            await copyHTML();
+            break;
+          case 'copy-markdown':
+            await copyMarkdown();
+            break;
+          case 'copy-text':
+            await copyPlainText();
+            break;
+          case 'batch':
+            openBatchExport();
             break;
         }
       };
