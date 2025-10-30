@@ -297,6 +297,20 @@
       font-weight: 500;
       color: var(--md-sys-color-on-surface);
     }
+    #tocClose {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+      opacity: 0.7;
+      color: inherit;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    #tocClose:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
     #tocList {
       list-style: none;
       padding: 0;
@@ -1384,7 +1398,10 @@
   <!-- Table of Contents -->
   <button id="tocToggle" title="Toggle Table of Contents">📑</button>
   <div id="tocPanel">
-    <h3>Table of Contents</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h3 style="margin: 0;">Table of Contents</h3>
+      <button id="tocClose" title="Close Table of Contents" aria-label="Close Table of Contents">✕</button>
+    </div>
     <ul id="tocList"></ul>
   </div>
 
@@ -1607,6 +1624,7 @@
       tocToggle: document.getElementById('tocToggle'),
       tocPanel: document.getElementById('tocPanel'),
       tocList: document.getElementById('tocList'),
+      tocClose: document.getElementById('tocClose'),
       searchFilenameBtn: document.getElementById('searchFilenameBtn'),
       searchContentBtn: document.getElementById('searchContentBtn'),
       searchResults: document.getElementById('searchResults'),
@@ -3893,6 +3911,22 @@ ${content}`;
     if (DOM.tocToggle) {
       DOM.tocToggle.onclick = toggleTOC;
     }
+
+    // TOC close button
+    if (DOM.tocClose) {
+      DOM.tocClose.onclick = () => {
+        DOM.tocPanel.classList.remove('show');
+      };
+    }
+
+    // Close TOC when clicking outside
+    document.addEventListener('click', (e) => {
+      if (DOM.tocPanel.classList.contains('show') &&
+          !DOM.tocPanel.contains(e.target) &&
+          !DOM.tocToggle.contains(e.target)) {
+        DOM.tocPanel.classList.remove('show');
+      }
+    });
 
     // ============================================================================
     // RESIZABLE SIDEBAR
