@@ -257,6 +257,9 @@
       cursor: pointer;
       border-radius: 4px;
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     #fileTree details summary::before {
       content: "📁";
@@ -267,6 +270,18 @@
     }
     #fileTree details summary:hover::before {
       transform: scale(1.2);
+    }
+    .folder-name {
+      flex: 1;
+    }
+    .folder-count {
+      background: var(--md-sys-color-primary);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+      opacity: 0.8;
     }
     #fileTree .file {
       margin-left: 28px;
@@ -286,6 +301,19 @@
     }
     #fileTree .file:hover::before {
       transform: scale(1.2);
+    }
+    #fileTree .file.readme {
+      font-weight: 600;
+      color: #1976d2;
+    }
+    #fileTree .file.readme::before {
+      content: "📘";
+      opacity: 1;
+    }
+    .file-favorite-indicator {
+      font-size: 11px;
+      margin-left: 4px;
+      opacity: 0.8;
     }
     #fileTree details[open] > summary::before {
       content: "📂";
@@ -2513,6 +2541,7 @@
       }
 
       renderFavorites();
+      renderTree(); // Update tree to show/hide favorite indicators
       return favorites.includes(path);
     }
 
@@ -3638,6 +3667,16 @@ ${content}`;
     const renderTree = debounce(renderTreeImmediate, CONFIG.RENDER_DEBOUNCE_MS);
 
     /**
+     * Counts total number of files in a node (recursively)
+     * @param {Object} node - Tree node
+     * @returns {number} Number of files
+     */
+    function countFiles(node) {
+      if (!node.children) return 1;
+      return node.children.reduce((sum, child) => sum + countFiles(child), 0);
+    }
+
+    /**
      * Recursively renders a tree node with search filtering
      * @param {Object} node - Tree node to render
      * @returns {HTMLElement|null}
@@ -3656,7 +3695,20 @@ ${content}`;
         details.open = isOpen;
 
         const summary = document.createElement('summary');
-        summary.textContent = node.name || '/';
+
+        // Create folder name span
+        const folderNameSpan = document.createElement('span');
+        folderNameSpan.className = 'folder-name';
+        folderNameSpan.textContent = node.name || '/';
+        summary.appendChild(folderNameSpan);
+
+        // Add file count badge
+        const fileCount = countFiles(node);
+        const countBadge = document.createElement('span');
+        countBadge.className = 'folder-count';
+        countBadge.textContent = fileCount.toString();
+        summary.appendChild(countBadge);
+
         details.appendChild(summary);
 
         details.addEventListener('toggle', () => {
@@ -3676,10 +3728,29 @@ ${content}`;
 
         const div = document.createElement('div');
         let className = CONFIG.CSS_CLASSES.FILE;
+
+        // Add README class for special styling
+        if (node.name.toLowerCase() === 'readme.md') {
+          className += ' readme';
+        }
+
         if (selectedPath === node.path) className += ' ' + CONFIG.CSS_CLASSES.SELECTED;
         if (focusedPath === node.path) className += ' focused';
         div.className = className;
-        div.textContent = node.name;
+
+        // Create file name text node
+        const fileName = document.createTextNode(node.name);
+        div.appendChild(fileName);
+
+        // Add favorite indicator if file is favorited
+        if (favorites.includes(node.path)) {
+          const favIcon = document.createElement('span');
+          favIcon.className = 'file-favorite-indicator';
+          favIcon.textContent = '⭐';
+          favIcon.title = 'Favorited';
+          div.appendChild(favIcon);
+        }
+
         div.onclick = () => {
           focusedPath = node.path;
           openFile(node);
