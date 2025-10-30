@@ -315,6 +315,65 @@
       margin-left: 4px;
       opacity: 0.8;
     }
+    /* Tree Toolbar */
+    .tree-toolbar {
+      display: flex;
+      gap: 4px;
+      padding: 8px 0;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--md-sys-color-outline);
+    }
+    .tree-toolbar button {
+      flex: 1;
+      padding: 6px 8px;
+      font-size: 11px;
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      border: 1px solid var(--md-sys-color-outline);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .tree-toolbar button:hover {
+      background: var(--md-sys-color-hover);
+      border-color: var(--md-sys-color-primary);
+    }
+    .tree-toolbar button:active {
+      transform: scale(0.95);
+    }
+    /* Tree Statistics Footer */
+    .tree-stats {
+      margin-top: 12px;
+      padding: 10px;
+      background: var(--md-sys-color-surface-variant);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--md-sys-color-on-surface);
+      border: 1px solid var(--md-sys-color-outline);
+    }
+    .tree-stats-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 0;
+    }
+    .tree-stats-line:not(:last-child) {
+      margin-bottom: 4px;
+    }
+    .tree-stats-value {
+      font-weight: 600;
+      color: var(--md-sys-color-primary);
+    }
+    /* Active path highlighting */
+    #fileTree .in-active-path > summary {
+      background: rgba(25, 118, 210, 0.1);
+      border-left: 3px solid var(--md-sys-color-primary);
+      padding-left: 17px;
+    }
     #fileTree details[open] > summary::before {
       content: "📂";
     }
@@ -1441,7 +1500,39 @@
           <div id="recentFilesList"></div>
         </div>
       </div>
+      <!-- Tree Toolbar -->
+      <div class="tree-toolbar">
+        <button id="treeSortBtn" title="Toggle sort order">
+          <span id="treeSortIcon">↕️</span>
+          <span id="treeSortLabel">A-Z</span>
+        </button>
+        <button id="treeExpandBtn" title="Expand all folders">📂 All</button>
+        <button id="treeCollapseBtn" title="Collapse all folders">📁 None</button>
+        <button id="treeRefreshBtn" title="Refresh tree">🔄</button>
+      </div>
       <div id="fileTree"></div>
+      <!-- Tree Statistics -->
+      <div class="tree-stats" id="treeStats">
+        <div class="tree-stats-line">
+          <span>📄</span>
+          <span id="statsFiles" class="tree-stats-value">0</span>
+          <span>files in</span>
+          <span id="statsFolders" class="tree-stats-value">0</span>
+          <span>folders</span>
+        </div>
+        <div class="tree-stats-line">
+          <span>⭐</span>
+          <span id="statsFavorites" class="tree-stats-value">0</span>
+          <span>favorites ·</span>
+          <span>🕐</span>
+          <span id="statsRecent" class="tree-stats-value">0</span>
+          <span>recent</span>
+        </div>
+        <div class="tree-stats-line" id="statsSearchLine" style="display: none;">
+          <span>🔍</span>
+          <span id="statsSearchText">Showing all files</span>
+        </div>
+      </div>
       <div class="resize-handle" id="resizeHandle"></div>
     </aside>
     <section id="dropZone" style="position:relative;" role="region" aria-label="Document viewer">
@@ -1708,7 +1799,8 @@
         CODE_THEME: 'mdviewer_code_theme',
         THEME_PRESET: 'mdviewer_theme_preset',
         FAVORITES_COLLAPSED: 'mdviewer_favorites_collapsed',
-        RECENT_COLLAPSED: 'mdviewer_recent_collapsed'
+        RECENT_COLLAPSED: 'mdviewer_recent_collapsed',
+        TREE_SORT_ORDER: 'mdviewer_tree_sort_order'
       },
       FILE_EXTENSIONS: ['.md', '.markdown'],
       SEARCH_DEBOUNCE_MS: 300,
@@ -1793,6 +1885,19 @@
       recentToggle: document.getElementById('recentToggle'),
       recentCount: document.getElementById('recentCount'),
       recentContent: document.getElementById('recentContent'),
+      treeSortBtn: document.getElementById('treeSortBtn'),
+      treeSortIcon: document.getElementById('treeSortIcon'),
+      treeSortLabel: document.getElementById('treeSortLabel'),
+      treeExpandBtn: document.getElementById('treeExpandBtn'),
+      treeCollapseBtn: document.getElementById('treeCollapseBtn'),
+      treeRefreshBtn: document.getElementById('treeRefreshBtn'),
+      treeStats: document.getElementById('treeStats'),
+      statsFiles: document.getElementById('statsFiles'),
+      statsFolders: document.getElementById('statsFolders'),
+      statsFavorites: document.getElementById('statsFavorites'),
+      statsRecent: document.getElementById('statsRecent'),
+      statsSearchLine: document.getElementById('statsSearchLine'),
+      statsSearchText: document.getElementById('statsSearchText'),
       breadcrumbNav: document.getElementById('breadcrumbNav'),
       recentFilesList: document.getElementById('recentFilesList'),
       favoritesList: document.getElementById('favoritesList'),
@@ -1830,6 +1935,7 @@
     let searchMode = localStorage.getItem(CONFIG.STORAGE_KEYS.SEARCH_MODE) || 'filename';
     let recentFiles = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.RECENT_FILES) || '[]');
     let favorites = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]');
+    let treeSortOrder = localStorage.getItem(CONFIG.STORAGE_KEYS.TREE_SORT_ORDER) || 'asc'; // 'asc' or 'desc'
     let renderDebounceTimer = null;
     let searchInProgress = false;
 
@@ -2382,6 +2488,7 @@
         DOM.searchLoading.classList.remove('show');
         // Filter tree to show only matching files
         renderTree();
+        updateTreeStats();
       }
     }
 
@@ -3555,6 +3662,10 @@ ${content}`;
         } else {
           mergeTrees(tree, newTree);
         }
+
+        // Apply sort order
+        sortTree(tree, treeSortOrder);
+
         renderTree();
 
         const fileCount = markdownFiles.length;
@@ -3658,6 +3769,9 @@ ${content}`;
       DOM.fileTree.appendChild(renderNode(tree));
 
       performanceMetrics.renderTime = performance.now() - startTime;
+
+      // Update tree statistics
+      updateTreeStats();
     }
 
     /**
@@ -3677,6 +3791,153 @@ ${content}`;
     }
 
     /**
+     * Counts total number of folders in a node (recursively)
+     * @param {Object} node - Tree node
+     * @returns {number} Number of folders
+     */
+    function countFolders(node) {
+      if (!node.children) return 0;
+      return node.children.reduce((sum, child) =>
+        sum + (child.children ? 1 + countFolders(child) : 0), 0);
+    }
+
+    /**
+     * Updates tree statistics display
+     */
+    function updateTreeStats() {
+      if (!tree) return;
+
+      const fileCount = countFiles(tree);
+      const folderCount = countFolders(tree);
+      const favCount = favorites.filter(path => allFileNodes.find(n => n.path === path)).length;
+      const recentCount = recentFiles.filter(path => allFileNodes.find(n => n.path === path)).length;
+
+      DOM.statsFiles.textContent = fileCount;
+      DOM.statsFolders.textContent = folderCount;
+      DOM.statsFavorites.textContent = favCount;
+      DOM.statsRecent.textContent = recentCount;
+
+      // Update search status
+      const searchQuery = DOM.searchBox.value.trim();
+      if (searchQuery) {
+        const matchingFiles = allFileNodes.filter(node =>
+          node.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        DOM.statsSearchLine.style.display = 'flex';
+        DOM.statsSearchText.textContent = `Showing ${matchingFiles.length} of ${fileCount} files`;
+      } else {
+        DOM.statsSearchLine.style.display = 'none';
+      }
+    }
+
+    /**
+     * Sorts tree children alphabetically
+     * @param {Object} node - Tree node
+     * @param {string} order - 'asc' or 'desc'
+     */
+    function sortTree(node, order = 'asc') {
+      if (!node.children) return;
+
+      node.children.sort((a, b) => {
+        // Folders first, then files
+        if (a.children && !b.children) return -1;
+        if (!a.children && b.children) return 1;
+
+        // Alphabetical sort
+        const comparison = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+        return order === 'asc' ? comparison : -comparison;
+      });
+
+      // Recursively sort children
+      node.children.forEach(child => sortTree(child, order));
+    }
+
+    /**
+     * Toggles tree sort order
+     */
+    function toggleTreeSort() {
+      treeSortOrder = treeSortOrder === 'asc' ? 'desc' : 'asc';
+      localStorage.setItem(CONFIG.STORAGE_KEYS.TREE_SORT_ORDER, treeSortOrder);
+
+      DOM.treeSortLabel.textContent = treeSortOrder === 'asc' ? 'A-Z' : 'Z-A';
+
+      if (tree) {
+        sortTree(tree, treeSortOrder);
+        renderTree();
+      }
+    }
+
+    /**
+     * Expands all folders in the tree
+     */
+    function expandAllFolders() {
+      const allDetails = DOM.fileTree.querySelectorAll('details');
+      allDetails.forEach(details => {
+        details.open = true;
+        const path = details.querySelector('summary')?.parentElement?.dataset?.path;
+        if (path) {
+          folderState[path] = true;
+        }
+      });
+      saveFolderState();
+    }
+
+    /**
+     * Collapses all folders in the tree
+     */
+    function collapseAllFolders() {
+      const allDetails = DOM.fileTree.querySelectorAll('details');
+      allDetails.forEach(details => {
+        details.open = false;
+        const path = details.querySelector('summary')?.parentElement?.dataset?.path;
+        if (path) {
+          folderState[path] = false;
+        }
+      });
+      saveFolderState();
+    }
+
+    /**
+     * Refreshes the tree (re-renders)
+     */
+    function refreshTree() {
+      renderTree();
+      updateTreeStats();
+      showToast('Tree refreshed', 'success');
+    }
+
+    /**
+     * Highlights path to active file in tree
+     * @param {string} filePath - Path of active file
+     */
+    function highlightActivePath(filePath) {
+      // Remove previous highlights
+      DOM.fileTree.querySelectorAll('.in-active-path').forEach(el => {
+        el.classList.remove('in-active-path');
+      });
+
+      if (!filePath) return;
+
+      // Get path segments
+      const segments = filePath.split('/').filter(s => s);
+
+      // Find and highlight all folders in path
+      let currentPath = '';
+      segments.slice(0, -1).forEach(segment => {
+        currentPath += (currentPath ? '/' : '') + segment;
+        const details = Array.from(DOM.fileTree.querySelectorAll('details')).find(d => {
+          const summary = d.querySelector('summary');
+          const folderName = summary?.querySelector('.folder-name')?.textContent;
+          return folderName === segment;
+        });
+
+        if (details) {
+          details.classList.add('in-active-path');
+        }
+      });
+    }
+
+    /**
      * Recursively renders a tree node with search filtering
      * @param {Object} node - Tree node to render
      * @returns {HTMLElement|null}
@@ -3693,6 +3954,7 @@ ${content}`;
         const details = document.createElement('details');
         const isOpen = folderState[node.path] ?? true;
         details.open = isOpen;
+        details.dataset.path = node.path; // For expand/collapse all functionality
 
         const summary = document.createElement('summary');
 
@@ -3785,6 +4047,9 @@ ${content}`;
 
         // Render breadcrumbs with star toggle
         renderBreadcrumbs(node.path);
+
+        // Highlight active path in tree
+        highlightActivePath(node.path);
 
         // Add star toggle button
         const starBtn = document.createElement('button');
@@ -3965,6 +4230,7 @@ ${content}`;
         searchDebounceTimer = setTimeout(() => {
           DOM.searchResults.textContent = '';
           renderTree();
+          updateTreeStats();
         }, CONFIG.SEARCH_DEBOUNCE_MS);
       }
     };
@@ -4223,6 +4489,25 @@ ${content}`;
       DOM.searchBox.dispatchEvent(new Event('input'));
       DOM.searchBox.focus();
     };
+
+    // ============================================================================
+    // TREE TOOLBAR
+    // ============================================================================
+
+    // Sort button
+    DOM.treeSortBtn.onclick = toggleTreeSort;
+
+    // Expand all button
+    DOM.treeExpandBtn.onclick = expandAllFolders;
+
+    // Collapse all button
+    DOM.treeCollapseBtn.onclick = collapseAllFolders;
+
+    // Refresh button
+    DOM.treeRefreshBtn.onclick = refreshTree;
+
+    // Initialize sort label
+    DOM.treeSortLabel.textContent = treeSortOrder === 'asc' ? 'A-Z' : 'Z-A';
 
     // ============================================================================
     // RESIZABLE SIDEBAR
