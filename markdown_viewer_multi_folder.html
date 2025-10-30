@@ -30,6 +30,74 @@
       --md-sys-color-error-bg: #3e1f1f;
       --md-sys-color-error-text: #ef5350;
     }
+    /* High Contrast Mode */
+    [data-contrast="high"] {
+      --md-sys-color-primary: #0000EE;
+      --md-sys-color-surface: #FFFFFF;
+      --md-sys-color-on-surface: #000000;
+      --md-sys-color-outline: #000000;
+      --md-sys-color-background: #FFFFFF;
+      --md-sys-color-hover: #FFFF00;
+      --md-sys-color-code-bg: #F0F0F0;
+      --md-sys-color-error-bg: #FFCCCC;
+      --md-sys-color-error-text: #CC0000;
+    }
+    [data-contrast="high"][data-theme="dark"] {
+      --md-sys-color-primary: #FFFF00;
+      --md-sys-color-surface: #000000;
+      --md-sys-color-on-surface: #FFFFFF;
+      --md-sys-color-outline: #FFFFFF;
+      --md-sys-color-background: #000000;
+      --md-sys-color-hover: #0000FF;
+      --md-sys-color-code-bg: #1A1A1A;
+      --md-sys-color-error-bg: #330000;
+      --md-sys-color-error-text: #FF0000;
+    }
+    /* Accessibility: Skip Links */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--md-sys-color-primary);
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 0 0 4px 0;
+      z-index: 10000;
+      font-weight: 500;
+    }
+    .skip-link:focus {
+      top: 0;
+    }
+    /* Accessibility: Screen Reader Only */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+    /* Enhanced Focus Indicators */
+    *:focus {
+      outline: 3px solid var(--md-sys-color-primary);
+      outline-offset: 2px;
+    }
+    *:focus:not(:focus-visible) {
+      outline: none;
+    }
+    *:focus-visible {
+      outline: 3px solid var(--md-sys-color-primary);
+      outline-offset: 2px;
+    }
+    [data-contrast="high"] *:focus,
+    [data-contrast="high"] *:focus-visible {
+      outline-width: 4px;
+      outline-style: solid;
+    }
     * {
       box-sizing: border-box;
     }
@@ -1167,22 +1235,31 @@
   </style>
 </head>
 <body>
-  <header>
+  <!-- Skip Links for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <a href="#sidebar" class="skip-link">Skip to file tree</a>
+  <a href="#searchBox" class="skip-link">Skip to search</a>
+
+  <!-- Screen reader announcements -->
+  <div id="sr-announcements" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <header role="banner">
     <div style="display:flex;align-items:center;gap:12px;">
-      <button id="menuToggle" title="Toggle sidebar">☰</button>
+      <button id="menuToggle" title="Toggle sidebar" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="false">☰</button>
       <h1>Markdown Viewer</h1>
     </div>
-    <div style="display:flex;gap:10px;align-items:center;">
-      <button id="themeToggle" title="Toggle dark mode">🌙</button>
-      <label><input id="folderInput" type="file" webkitdirectory multiple hidden><button id="folderBtn">Folder</button></label>
-      <label><input id="zipInput" type="file" accept=".zip" hidden><button id="zipBtn">Zip</button></label>
-      <button id="clearBtn">Clear</button>
-      <button id="settingsBtn" title="Settings">⚙️</button>
-    </div>
+    <nav aria-label="Main navigation" style="display:flex;gap:10px;align-items:center;">
+      <button id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">🌙</button>
+      <button id="highContrastToggle" title="Toggle high contrast mode" aria-label="Toggle high contrast mode" aria-pressed="false">◐</button>
+      <label><input id="folderInput" type="file" webkitdirectory multiple hidden aria-label="Load folder"><button id="folderBtn" aria-label="Load folder">Folder</button></label>
+      <label><input id="zipInput" type="file" accept=".zip" hidden aria-label="Load ZIP file"><button id="zipBtn" aria-label="Load ZIP file">Zip</button></label>
+      <button id="clearBtn" aria-label="Clear all loaded files">Clear</button>
+      <button id="settingsBtn" title="Settings" aria-label="Open settings" aria-haspopup="dialog">⚙️</button>
+    </nav>
   </header>
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  <main>
-    <aside id="sidebar">
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+  <main role="main">
+    <aside id="sidebar" role="navigation" aria-label="File tree navigation">
       <div id="searchMode">
         <button id="searchFilenameBtn" class="active" title="Search by filename">Name</button>
         <button id="searchContentBtn" title="Search in file contents">Content</button>
@@ -1200,16 +1277,16 @@
       <div id="fileTree"></div>
       <div class="resize-handle" id="resizeHandle"></div>
     </aside>
-    <section id="dropZone" style="position:relative;">
-      <div class="drop-zone-hint">📁 Drop folder or ZIP file here</div>
-      <div style="max-width:900px;margin:0 auto;">
+    <section id="dropZone" style="position:relative;" role="region" aria-label="Document viewer">
+      <div class="drop-zone-hint" aria-hidden="true">📁 Drop folder or ZIP file here</div>
+      <div id="main-content" style="max-width:900px;margin:0 auto;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
           <div style="flex:1;">
-            <div id="breadcrumbNav"></div>
-            <div id="selectedPath" style="font-size:14px;color:#5f6368;display:none;">No file selected</div>
+            <nav id="breadcrumbNav" aria-label="Breadcrumb"></nav>
+            <div id="selectedPath" style="font-size:14px;color:#5f6368;display:none;" role="status" aria-live="polite">No file selected</div>
           </div>
           <div class="export-dropdown">
-            <button id="exportBtn" class="export-dropdown-btn" title="Export current document">
+            <button id="exportBtn" class="export-dropdown-btn" title="Export current document" aria-label="Export current document" aria-haspopup="menu" aria-expanded="false">
               📥 Export ▾
             </button>
             <div id="exportDropdown" class="export-dropdown-content">
@@ -1312,11 +1389,11 @@
   </div>
 
   <!-- Settings Panel -->
-  <div id="settingsPanel">
+  <div id="settingsPanel" role="dialog" aria-labelledby="settingsTitle" aria-modal="true">
     <div class="settings-content">
       <div class="settings-header">
-        <h2>⚙️ Settings</h2>
-        <button class="settings-close" id="settingsClose">×</button>
+        <h2 id="settingsTitle">⚙️ Settings</h2>
+        <button class="settings-close" id="settingsClose" aria-label="Close settings">×</button>
       </div>
       <div class="settings-body">
         <!-- Appearance Settings -->
@@ -1395,11 +1472,11 @@
   </div>
 
   <!-- Batch Export Modal -->
-  <div id="batchExportModal">
+  <div id="batchExportModal" role="dialog" aria-labelledby="batchExportTitle" aria-modal="true">
     <div class="batch-export-content">
       <div class="batch-export-header">
-        <h2>📦 Batch Export</h2>
-        <button class="settings-close" id="batchExportClose">×</button>
+        <h2 id="batchExportTitle">📦 Batch Export</h2>
+        <button class="settings-close" id="batchExportClose" aria-label="Close batch export">×</button>
       </div>
       <div class="batch-export-body">
         <div style="margin-bottom:16px;">
@@ -1517,6 +1594,8 @@
       exportBtn: document.getElementById('exportBtn'),
       exportDropdown: document.getElementById('exportDropdown'),
       themeToggle: document.getElementById('themeToggle'),
+      highContrastToggle: document.getElementById('highContrastToggle'),
+      srAnnouncements: document.getElementById('sr-announcements'),
       dropZone: document.getElementById('dropZone'),
       loadingOverlay: document.getElementById('loadingOverlay'),
       loadingText: document.getElementById('loadingText'),
@@ -2799,8 +2878,12 @@ ${content}`;
       // Set appropriate data-theme
       root.setAttribute('data-theme', isDark ? 'dark' : 'light');
 
-      // Update theme toggle icon
-      DOM.themeToggle.textContent = isDark ? '☀️' : '🌙';
+      // Update theme toggle icon if it exists
+      if (DOM.themeToggle) {
+        DOM.themeToggle.textContent = isDark ? '☀️' : '🌙';
+        DOM.themeToggle.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+        DOM.themeToggle.setAttribute('aria-pressed', isDark);
+      }
 
       // Save preset
       localStorage.setItem(CONFIG.STORAGE_KEYS.THEME_PRESET, presetName);
@@ -2943,8 +3026,14 @@ ${content}`;
      */
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
-      DOM.themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
-      DOM.themeToggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+
+      // Update theme toggle button if it exists
+      if (DOM.themeToggle) {
+        DOM.themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        DOM.themeToggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        DOM.themeToggle.setAttribute('aria-pressed', theme === 'dark');
+      }
+
       try {
         localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, theme);
       } catch (e) {
@@ -2967,7 +3056,103 @@ ${content}`;
     function toggleTheme() {
       const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      applyTheme(newTheme);
+
+      // Use applyThemePreset to ensure preset system stays in sync
+      applyThemePreset(newTheme);
+
+      // Announce to screen readers
+      announceToScreenReader(`${newTheme === 'dark' ? 'Dark' : 'Light'} mode activated`);
+    }
+
+    /**
+     * Gets current high contrast mode state
+     * @returns {boolean}
+     */
+    function getHighContrastMode() {
+      return document.documentElement.getAttribute('data-contrast') === 'high';
+    }
+
+    /**
+     * Sets high contrast mode
+     * @param {boolean} enabled - Whether to enable high contrast
+     */
+    function setHighContrastMode(enabled) {
+      if (enabled) {
+        document.documentElement.setAttribute('data-contrast', 'high');
+        localStorage.setItem('mdviewer_high_contrast', 'true');
+      } else {
+        document.documentElement.removeAttribute('data-contrast');
+        localStorage.removeItem('mdviewer_high_contrast');
+      }
+
+      // Update high contrast toggle button if it exists
+      if (DOM.highContrastToggle) {
+        DOM.highContrastToggle.setAttribute('aria-pressed', enabled);
+      }
+
+      announceToScreenReader(`High contrast mode ${enabled ? 'enabled' : 'disabled'}`);
+    }
+
+    /**
+     * Toggles high contrast mode
+     */
+    function toggleHighContrast() {
+      const current = getHighContrastMode();
+      setHighContrastMode(!current);
+    }
+
+    /**
+     * Announces message to screen readers
+     * @param {string} message - Message to announce
+     */
+    function announceToScreenReader(message) {
+      if (!message) return;
+
+      // Show visual toast notification for sighted users
+      showToast(message, 'info', 3000);
+
+      // Also update aria-live region for screen readers
+      if (DOM.srAnnouncements) {
+        // Clear previous announcement
+        DOM.srAnnouncements.textContent = '';
+
+        // Small delay to ensure screen reader picks up the change
+        setTimeout(() => {
+          DOM.srAnnouncements.textContent = message;
+        }, 100);
+
+        // Clear after announcement
+        setTimeout(() => {
+          DOM.srAnnouncements.textContent = '';
+        }, 3000);
+      }
+    }
+
+    /**
+     * Updates ARIA expanded state for dropdown
+     * @param {HTMLElement} button - Button element
+     * @param {boolean} isExpanded - Whether dropdown is expanded
+     */
+    function updateAriaExpanded(button, isExpanded) {
+      if (button) {
+        button.setAttribute('aria-expanded', isExpanded);
+      }
+    }
+
+    /**
+     * Updates menu toggle ARIA state
+     * @param {boolean} isOpen - Whether sidebar is open
+     */
+    function updateSidebarAriaState(isOpen) {
+      // Update menu toggle button if it exists
+      if (DOM.menuToggle) {
+        DOM.menuToggle.setAttribute('aria-expanded', isOpen);
+      }
+
+      // Update sidebar overlay if it exists
+      if (DOM.sidebarOverlay) {
+        DOM.sidebarOverlay.setAttribute('aria-hidden', !isOpen);
+      }
     }
 
     /**
@@ -3429,9 +3614,14 @@ ${content}`;
         });
 
         renderTree();
+
+        // Announce to screen readers
+        const fileName = node.path.split('/').pop();
+        announceToScreenReader(`Opened file: ${fileName}`);
       } catch (e) {
         console.error('Error opening file:', e);
         showError(CONFIG.MESSAGES.FILE_READ_ERROR);
+        announceToScreenReader('Error opening file');
       }
     }
 
@@ -3441,12 +3631,20 @@ ${content}`;
 
     DOM.folderBtn.onclick = () => DOM.folderInput.click();
     DOM.zipBtn.onclick = () => DOM.zipInput.click();
-    DOM.themeToggle.onclick = toggleTheme;
+
+    // Theme and accessibility toggles with null checks
+    if (DOM.themeToggle) {
+      DOM.themeToggle.onclick = toggleTheme;
+    }
+    if (DOM.highContrastToggle) {
+      DOM.highContrastToggle.onclick = toggleHighContrast;
+    }
 
     DOM.clearBtn.onclick = () => {
       tree = null;
       DOM.fileTree.innerHTML = '';
       DOM.preview.innerHTML = CONFIG.MESSAGES.SELECT_FILE;
+      announceToScreenReader('All files cleared');
       DOM.selectedPath.textContent = CONFIG.MESSAGES.NO_FILE;
     };
 
@@ -3564,13 +3762,15 @@ ${content}`;
     // Export dropdown toggle
     DOM.exportBtn.onclick = (e) => {
       e.stopPropagation();
-      DOM.exportDropdown.classList.toggle('show');
+      const isOpen = DOM.exportDropdown.classList.toggle('show');
+      updateAriaExpanded(DOM.exportBtn, isOpen);
     };
 
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
       if (!DOM.exportBtn.contains(e.target) && !DOM.exportDropdown.contains(e.target)) {
         DOM.exportDropdown.classList.remove('show');
+        updateAriaExpanded(DOM.exportBtn, false);
       }
     });
 
@@ -3665,13 +3865,15 @@ ${content}`;
     // ============================================================================
 
     function toggleMobileSidebar() {
-      DOM.sidebar.classList.toggle('mobile-open');
+      const isOpen = DOM.sidebar.classList.toggle('mobile-open');
       DOM.sidebarOverlay.classList.toggle('show');
+      updateSidebarAriaState(isOpen);
     }
 
     function closeMobileSidebar() {
       DOM.sidebar.classList.remove('mobile-open');
       DOM.sidebarOverlay.classList.remove('show');
+      updateSidebarAriaState(false);
     }
 
     DOM.menuToggle.onclick = toggleMobileSidebar;
@@ -3879,8 +4081,11 @@ ${content}`;
     // INITIALIZATION
     // ============================================================================
 
-    // Initialize theme on page load
-    applyTheme(getTheme());
+    // Initialize high contrast mode
+    const savedHighContrast = localStorage.getItem('mdviewer_high_contrast') === 'true';
+    if (savedHighContrast) {
+      setHighContrastMode(true);
+    }
 
     // Restore sidebar width from localStorage
     const savedWidth = localStorage.getItem(CONFIG.STORAGE_KEYS.SIDEBAR_WIDTH);
@@ -3933,8 +4138,9 @@ ${content}`;
     if (savedThemePreset) {
       applyThemePreset(savedThemePreset);
     } else {
-      // Initialize with default theme
-      applyThemePreset(getTheme());
+      // Initialize with default light theme (or migrate from old theme key if present)
+      const legacyTheme = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME);
+      applyThemePreset(legacyTheme === 'dark' ? 'dark' : 'light');
     }
 
     // Render theme grid

@@ -52,6 +52,10 @@ This is a standalone, single-file HTML application that provides a feature-rich 
 - `performBatchExport()`: Executes batch export with progress tracking
 - `generateTOC()`: Auto-generates table of contents from headings
 - `applyThemePreset(name)`: Applies one of 6 predefined theme presets
+- `toggleHighContrast()`: Toggles high contrast mode for better visibility
+- `announceToScreenReader(message)`: Announces messages to screen readers via live region
+- `updateAriaExpanded(button, isExpanded)`: Updates ARIA expanded state for dropdowns
+- `updateSidebarAriaState(isOpen)`: Updates ARIA states for mobile sidebar
 
 **Performance Optimizations**:
 - **LRU Cache**: Intelligent caching with configurable size limits (50 files, 5MB max per file)
@@ -142,3 +146,13 @@ All dependencies are loaded at runtime; no package manager or build tools are us
 - **Math Equations**: LaTeX math rendering via KaTeX
 - **Table of Contents**: Auto-generated from headings with floating panel
 - **Search Highlighting**: Visual highlighting of search terms in content
+
+### Accessibility Features
+- **Skip Links**: Keyboard shortcuts to jump to main content, file tree, or search
+- **ARIA Labels**: Complete ARIA labeling for screen readers on all interactive elements
+- **High Contrast Mode**: Toggle for enhanced visibility with high contrast colors
+- **Focus Indicators**: Visible 3px outline on focused elements (4px in high contrast)
+- **Screen Reader Announcements**: Live region announcements for file operations and state changes
+- **Semantic HTML**: Proper use of landmarks (banner, main, navigation, region) and roles
+- **Keyboard Navigation**: Full keyboard support with proper ARIA states
+- **Modal Accessibility**: Proper dialog roles with aria-modal and aria-labelledby
