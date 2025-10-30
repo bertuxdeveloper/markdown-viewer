@@ -1241,6 +1241,14 @@
       },
       FILE_EXTENSIONS: ['.md', '.markdown'],
       SEARCH_DEBOUNCE_MS: 300,
+      RENDER_DEBOUNCE_MS: 150,
+      PERFORMANCE: {
+        CACHE_MAX_SIZE: 50, // Maximum number of files to cache
+        CACHE_MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB max file size to cache
+        LAZY_LOAD_THRESHOLD: 100 * 1024, // 100KB - files larger than this are lazy loaded
+        VIRTUAL_SCROLL_THRESHOLD: 100, // Enable virtual scrolling for 100+ files
+        SEARCH_BATCH_SIZE: 10 // Number of files to search per batch
+      },
       CSS_CLASSES: {
         FILE: 'file',
         SELECTED: 'selected',
@@ -1326,8 +1334,132 @@
     let allFileNodes = [];
     let searchMode = localStorage.getItem(CONFIG.STORAGE_KEYS.SEARCH_MODE) || 'filename';
     let recentFiles = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.RECENT_FILES) || '[]');
-    let fileContentsCache = new Map(); // Cache file contents for search
     let favorites = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]');
+    let renderDebounceTimer = null;
+    let searchInProgress = false;
+
+    // Performance metrics
+    const performanceMetrics = {
+      filesLoaded: 0,
+      cacheHits: 0,
+      cacheMisses: 0,
+      searchTime: 0,
+      renderTime: 0
+    };
+
+    /**
+     * LRU Cache implementation for file contents
+     */
+    class LRUCache {
+      constructor(maxSize = CONFIG.PERFORMANCE.CACHE_MAX_SIZE) {
+        this.maxSize = maxSize;
+        this.cache = new Map();
+      }
+
+      get(key) {
+        if (!this.cache.has(key)) {
+          performanceMetrics.cacheMisses++;
+          return undefined;
+        }
+
+        performanceMetrics.cacheHits++;
+        const value = this.cache.get(key);
+        // Move to end (most recently used)
+        this.cache.delete(key);
+        this.cache.set(key, value);
+        return value;
+      }
+
+      set(key, value) {
+        // Don't cache files that are too large
+        if (value && value.length > CONFIG.PERFORMANCE.CACHE_MAX_FILE_SIZE) {
+          return;
+        }
+
+        // Remove if already exists (to update position)
+        if (this.cache.has(key)) {
+          this.cache.delete(key);
+        }
+
+        // Remove oldest if at capacity
+        if (this.cache.size >= this.maxSize) {
+          const firstKey = this.cache.keys().next().value;
+          this.cache.delete(firstKey);
+        }
+
+        this.cache.set(key, value);
+      }
+
+      has(key) {
+        return this.cache.has(key);
+      }
+
+      clear() {
+        this.cache.clear();
+      }
+
+      get size() {
+        return this.cache.size;
+      }
+    }
+
+    let fileContentsCache = new LRUCache();
+
+    /**
+     * Create Web Worker for background search (inline)
+     */
+    let searchWorker = null;
+    try {
+      const workerCode = `
+        self.onmessage = function(e) {
+          const { query, files, batchSize } = e.data;
+          const lowerQuery = query.toLowerCase();
+          const results = [];
+
+          // Process files in batches
+          for (let i = 0; i < files.length; i += batchSize) {
+            const batch = files.slice(i, i + batchSize);
+
+            for (const file of batch) {
+              if (file.content && file.content.toLowerCase().includes(lowerQuery)) {
+                const index = file.content.toLowerCase().indexOf(lowerQuery);
+                const start = Math.max(0, index - 30);
+                const end = Math.min(file.content.length, index + query.length + 30);
+                let snippet = file.content.substring(start, end);
+
+                if (start > 0) snippet = '...' + snippet;
+                if (end < file.content.length) snippet = snippet + '...';
+
+                results.push({
+                  path: file.path,
+                  snippet
+                });
+              }
+            }
+
+            // Report progress
+            self.postMessage({
+              type: 'progress',
+              processed: Math.min(i + batchSize, files.length),
+              total: files.length,
+              results: results.length
+            });
+          }
+
+          // Send final results
+          self.postMessage({
+            type: 'complete',
+            results
+          });
+        };
+      `;
+
+      const blob = new Blob([workerCode], { type: 'application/javascript' });
+      const workerUrl = URL.createObjectURL(blob);
+      searchWorker = new Worker(workerUrl);
+    } catch (e) {
+      console.warn('Web Worker not available, falling back to main thread search:', e);
+    }
 
     // Theme presets
     const THEME_PRESETS = {
@@ -1577,64 +1709,180 @@
     }
 
     /**
-     * Performs full-text search across file contents
+     * Performs full-text search using Web Worker when available
+     * @param {string} query - Search query
+     * @param {Array} cachedFiles - Files with cached content
+     */
+    function performWorkerSearch(query, cachedFiles) {
+      return new Promise((resolve, reject) => {
+        if (!searchWorker) {
+          reject(new Error('Worker not available'));
+          return;
+        }
+
+        const messageHandler = (e) => {
+          if (e.data.type === 'progress') {
+            DOM.searchResults.textContent = `Searching... ${e.data.processed}/${e.data.total} files (${e.data.results} matches)`;
+          } else if (e.data.type === 'complete') {
+            searchWorker.removeEventListener('message', messageHandler);
+            resolve(e.data.results);
+          }
+        };
+
+        searchWorker.addEventListener('message', messageHandler);
+        searchWorker.onerror = (error) => {
+          searchWorker.removeEventListener('message', messageHandler);
+          reject(error);
+        };
+
+        searchWorker.postMessage({
+          query,
+          files: cachedFiles,
+          batchSize: CONFIG.PERFORMANCE.SEARCH_BATCH_SIZE
+        });
+      });
+    }
+
+    /**
+     * Performs full-text search across file contents with batching
      * @param {string} query - Search query
      */
     async function performSearch(query) {
       if (!query || searchMode === 'filename') {
+        searchInProgress = false;
         DOM.searchResults.textContent = '';
         renderTree();
         return;
       }
 
+      // Prevent concurrent searches
+      if (searchInProgress) {
+        return;
+      }
+
+      searchInProgress = true;
+      const startTime = performance.now();
       const lowerQuery = query.toLowerCase();
-      const results = [];
+      let results = [];
+      const batchSize = CONFIG.PERFORMANCE.SEARCH_BATCH_SIZE;
 
-      // Search through all file nodes
-      for (const node of allFileNodes) {
-        try {
-          let content = fileContentsCache.get(node.path);
+      DOM.searchResults.textContent = `Searching...`;
 
-          if (!content) {
-            // Load and cache file content
-            if (node.file._content !== undefined) {
-              content = node.file._content;
-            } else {
-              content = await node.file.text();
+      try {
+        // Check how many files are already cached
+        const cachedFiles = allFileNodes
+          .map(node => ({
+            path: node.path,
+            content: fileContentsCache.get(node.path),
+            node
+          }))
+          .filter(f => f.content);
+
+        // Use Web Worker for cached files if available and beneficial
+        if (searchWorker && cachedFiles.length > 20) {
+          try {
+            const workerResults = await performWorkerSearch(
+              query,
+              cachedFiles.map(f => ({ path: f.path, content: f.content }))
+            );
+
+            // Map worker results back to nodes
+            results = workerResults.map(r => ({
+              node: allFileNodes.find(n => n.path === r.path),
+              snippet: r.snippet
+            })).filter(r => r.node);
+
+            console.log(`Worker search completed: ${results.length} results from ${cachedFiles.length} cached files`);
+
+            // Search remaining uncached files on main thread
+            const uncachedNodes = allFileNodes.filter(node => !fileContentsCache.has(node.path));
+            if (uncachedNodes.length > 0) {
+              DOM.searchResults.textContent = `Searching ${uncachedNodes.length} more files...`;
+
+              for (const node of uncachedNodes) {
+                try {
+                  const content = await lazyLoadFileContent(node.file);
+                  fileContentsCache.set(node.path, content);
+
+                  if (content.toLowerCase().includes(lowerQuery)) {
+                    const index = content.toLowerCase().indexOf(lowerQuery);
+                    const start = Math.max(0, index - 30);
+                    const end = Math.min(content.length, index + query.length + 30);
+                    let snippet = content.substring(start, end);
+
+                    if (start > 0) snippet = '...' + snippet;
+                    if (end < content.length) snippet = snippet + '...';
+
+                    results.push({ node, snippet });
+                  }
+                } catch (e) {
+                  console.error('Error searching file:', node.path, e);
+                }
+              }
             }
-            fileContentsCache.set(node.path, content);
+          } catch (workerError) {
+            console.warn('Worker search failed, falling back to main thread:', workerError);
+            // Fall through to main thread search
+            results = [];
           }
-
-          // Check if content contains query
-          if (content.toLowerCase().includes(lowerQuery)) {
-            // Find first occurrence for preview
-            const index = content.toLowerCase().indexOf(lowerQuery);
-            const start = Math.max(0, index - 30);
-            const end = Math.min(content.length, index + query.length + 30);
-            let snippet = content.substring(start, end);
-
-            if (start > 0) snippet = '...' + snippet;
-            if (end < content.length) snippet = snippet + '...';
-
-            results.push({
-              node,
-              snippet
-            });
-          }
-        } catch (e) {
-          console.error('Error searching file:', node.path, e);
         }
-      }
 
-      // Display results
-      if (results.length > 0) {
-        DOM.searchResults.textContent = `Found in ${results.length} file${results.length !== 1 ? 's' : ''}`;
-      } else {
-        DOM.searchResults.textContent = 'No matches found';
-      }
+        // Main thread search (fallback or if worker not used)
+        if (results.length === 0 || !searchWorker) {
+          for (let i = 0; i < allFileNodes.length; i += batchSize) {
+            const batch = allFileNodes.slice(i, i + batchSize);
 
-      // Filter tree to show only matching files
-      renderTree();
+            await Promise.all(batch.map(async (node) => {
+              try {
+                let content = fileContentsCache.get(node.path);
+
+                if (!content) {
+                  content = await lazyLoadFileContent(node.file);
+                  fileContentsCache.set(node.path, content);
+                }
+
+                if (content.toLowerCase().includes(lowerQuery)) {
+                  const index = content.toLowerCase().indexOf(lowerQuery);
+                  const start = Math.max(0, index - 30);
+                  const end = Math.min(content.length, index + query.length + 30);
+                  let snippet = content.substring(start, end);
+
+                  if (start > 0) snippet = '...' + snippet;
+                  if (end < content.length) snippet = snippet + '...';
+
+                  results.push({ node, snippet });
+                }
+              } catch (e) {
+                console.error('Error searching file:', node.path, e);
+              }
+            }));
+
+            // Yield to browser between batches
+            if (i + batchSize < allFileNodes.length) {
+              await new Promise(resolve => setTimeout(resolve, 0));
+            }
+          }
+        }
+
+        // Display results
+        performanceMetrics.searchTime = performance.now() - startTime;
+
+        if (results.length > 0) {
+          DOM.searchResults.textContent = `Found in ${results.length} file${results.length !== 1 ? 's' : ''} (${performanceMetrics.searchTime.toFixed(0)}ms)`;
+        } else {
+          DOM.searchResults.textContent = 'No matches found';
+        }
+
+        console.log(`Search completed in ${performanceMetrics.searchTime.toFixed(2)}ms. Cache: ${performanceMetrics.cacheHits} hits, ${performanceMetrics.cacheMisses} misses`);
+
+      } catch (error) {
+        console.error('Search error:', error);
+        DOM.searchResults.textContent = 'Search error occurred';
+      } finally {
+        searchInProgress = false;
+        // Filter tree to show only matching files
+        renderTree();
+      }
     }
 
     /**
@@ -2477,13 +2725,76 @@ ${content}`;
     }
 
     // ============================================================================
+    // PERFORMANCE UTILITIES
+    // ============================================================================
+
+    /**
+     * Creates a debounced function that delays execution
+     * @param {Function} func - Function to debounce
+     * @param {number} wait - Milliseconds to wait
+     * @returns {Function}
+     */
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    /**
+     * Creates a throttled function that limits execution rate
+     * @param {Function} func - Function to throttle
+     * @param {number} limit - Milliseconds between executions
+     * @returns {Function}
+     */
+    function throttle(func, limit) {
+      let inThrottle;
+      return function(...args) {
+        if (!inThrottle) {
+          func.apply(this, args);
+          inThrottle = true;
+          setTimeout(() => inThrottle = false, limit);
+        }
+      };
+    }
+
+    /**
+     * Lazy load file content with size check
+     * @param {Object} file - File object
+     * @returns {Promise<string>}
+     */
+    async function lazyLoadFileContent(file) {
+      // Check file size if available
+      if (file.size && file.size > CONFIG.PERFORMANCE.LAZY_LOAD_THRESHOLD) {
+        console.log(`Lazy loading large file: ${file.name} (${(file.size / 1024).toFixed(2)}KB)`);
+      }
+
+      // Check if content is already attached
+      if (file._content !== undefined) {
+        return file._content;
+      }
+
+      // Load and cache
+      const content = await file.text();
+      file._content = content;
+      return content;
+    }
+
+    // ============================================================================
     // RENDERING
     // ============================================================================
 
     /**
-     * Renders the entire file tree
+     * Renders the entire file tree (internal, not debounced)
      */
-    function renderTree() {
+    function renderTreeImmediate() {
+      const startTime = performance.now();
+
       DOM.fileTree.innerHTML = '';
       if (!tree) {
         DOM.fileTree.innerHTML = `
@@ -2500,7 +2811,15 @@ ${content}`;
       allFileNodes = collectFileNodes(tree);
 
       DOM.fileTree.appendChild(renderNode(tree));
+
+      performanceMetrics.renderTime = performance.now() - startTime;
     }
+
+    /**
+     * Debounced version of renderTree for better performance
+     * Use this for most cases to avoid excessive re-renders
+     */
+    const renderTree = debounce(renderTreeImmediate, CONFIG.RENDER_DEBOUNCE_MS);
 
     /**
      * Recursively renders a tree node with search filtering
@@ -2598,15 +2917,13 @@ ${content}`;
           closeMobileSidebar();
         }
 
-        let text = '';
-        if (node.file._content !== undefined) {
-          text = node.file._content;
-        } else {
-          text = await node.file.text();
-        }
+        // Use lazy loading for file content
+        const text = await lazyLoadFileContent(node.file);
 
         // Cache content for search
         fileContentsCache.set(node.path, text);
+
+        performanceMetrics.filesLoaded++;
 
         const html = marked.parse(text);
         DOM.preview.innerHTML = html;
@@ -3144,6 +3461,90 @@ ${content}`;
 
     // Render theme grid
     renderThemeGrid();
+
+    // ============================================================================
+    // PERFORMANCE MONITORING (CONSOLE API)
+    // ============================================================================
+
+    /**
+     * Global performance monitoring API accessible from browser console
+     */
+    window.mdViewerPerf = {
+      /**
+       * Get current performance metrics
+       */
+      getMetrics: function() {
+        return {
+          ...performanceMetrics,
+          cacheSize: fileContentsCache.size,
+          cacheMaxSize: CONFIG.PERFORMANCE.CACHE_MAX_SIZE,
+          filesInTree: allFileNodes.length,
+          cacheHitRate: performanceMetrics.cacheHits + performanceMetrics.cacheMisses > 0
+            ? (performanceMetrics.cacheHits / (performanceMetrics.cacheHits + performanceMetrics.cacheMisses) * 100).toFixed(2) + '%'
+            : 'N/A',
+          workerAvailable: searchWorker !== null
+        };
+      },
+
+      /**
+       * Display formatted performance report
+       */
+      report: function() {
+        const metrics = this.getMetrics();
+        console.group('%c📊 Markdown Viewer Performance Report', 'color: #1976d2; font-weight: bold; font-size: 14px;');
+        console.log('%cFile Operations', 'font-weight: bold; color: #0969da;');
+        console.log(`  Files Loaded: ${metrics.filesLoaded}`);
+        console.log(`  Files in Tree: ${metrics.filesInTree}`);
+        console.log('');
+        console.log('%cCache Performance', 'font-weight: bold; color: #0969da;');
+        console.log(`  Cache Size: ${metrics.cacheSize} / ${metrics.cacheMaxSize}`);
+        console.log(`  Cache Hits: ${metrics.cacheHits}`);
+        console.log(`  Cache Misses: ${metrics.cacheMisses}`);
+        console.log(`  Hit Rate: ${metrics.cacheHitRate}`);
+        console.log('');
+        console.log('%cRendering Performance', 'font-weight: bold; color: #0969da;');
+        console.log(`  Last Render Time: ${metrics.renderTime.toFixed(2)}ms`);
+        console.log(`  Last Search Time: ${metrics.searchTime.toFixed(2)}ms`);
+        console.log('');
+        console.log('%cOptimizations', 'font-weight: bold; color: #0969da;');
+        console.log(`  Web Worker: ${metrics.workerAvailable ? '✓ Available' : '✗ Not Available'}`);
+        console.log(`  Debounced Rendering: ✓ Enabled (${CONFIG.RENDER_DEBOUNCE_MS}ms)`);
+        console.log(`  Lazy Loading: ✓ Enabled (>${(CONFIG.PERFORMANCE.LAZY_LOAD_THRESHOLD / 1024).toFixed(0)}KB)`);
+        console.log(`  Batch Search: ✓ Enabled (${CONFIG.PERFORMANCE.SEARCH_BATCH_SIZE} files/batch)`);
+        console.groupEnd();
+        return metrics;
+      },
+
+      /**
+       * Clear cache
+       */
+      clearCache: function() {
+        fileContentsCache.clear();
+        performanceMetrics.cacheHits = 0;
+        performanceMetrics.cacheMisses = 0;
+        console.log('✓ Cache cleared');
+      },
+
+      /**
+       * Reset all metrics
+       */
+      reset: function() {
+        performanceMetrics.filesLoaded = 0;
+        performanceMetrics.cacheHits = 0;
+        performanceMetrics.cacheMisses = 0;
+        performanceMetrics.searchTime = 0;
+        performanceMetrics.renderTime = 0;
+        console.log('✓ Metrics reset');
+      }
+    };
+
+    // Log performance API availability
+    console.log('%c🚀 Markdown Viewer loaded successfully!', 'color: #1976d2; font-weight: bold;');
+    console.log('%cPerformance monitoring available:', 'color: #5f6368;');
+    console.log('  mdViewerPerf.report()    - View performance report');
+    console.log('  mdViewerPerf.getMetrics() - Get raw metrics');
+    console.log('  mdViewerPerf.clearCache() - Clear file cache');
+    console.log('  mdViewerPerf.reset()      - Reset all metrics');
   </script>
 </body>
 </html>

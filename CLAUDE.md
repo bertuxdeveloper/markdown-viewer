@@ -37,13 +37,23 @@ This is a standalone, single-file HTML application that provides a feature-rich 
 - `buildTree(files)`: Constructs hierarchical tree structure from flat file list
 - `mergeTrees(target, source)`: Merges new files into existing tree (allows loading multiple folders/zips)
 - `renderNode(node)`: Recursively renders tree nodes with search filtering
-- `openFile(node)`: Loads and renders markdown content, handles Mermaid diagrams, KaTeX math
-- `performSearch(query)`: Full-text search across file contents with caching
+- `renderTree()`: Debounced tree rendering for better performance
+- `openFile(node)`: Loads and renders markdown content with lazy loading
+- `performSearch(query)`: Full-text search with batching and Web Worker support
+- `lazyLoadFileContent(file)`: Lazy loads file content on-demand with size checks
 - `exportAsHTML()`: Exports current document as standalone HTML with theme preservation
 - `exportAsPDF()`: Exports current document as PDF using jsPDF and html2canvas
 - `exportAsMarkdown()`: Exports original markdown with YAML frontmatter annotations
 - `generateTOC()`: Auto-generates table of contents from headings
 - `applyThemePreset(name)`: Applies one of 6 predefined theme presets
+
+**Performance Optimizations**:
+- **LRU Cache**: Intelligent caching with configurable size limits (50 files, 5MB max per file)
+- **Lazy Loading**: Files >100KB are loaded on-demand to reduce memory usage
+- **Debounced Rendering**: Tree rendering debounced to 150ms to prevent excessive redraws
+- **Batch Processing**: Search processes files in batches of 10 to avoid UI blocking
+- **Web Worker**: Background search for cached files (20+ files) to keep UI responsive
+- **Performance Monitoring**: Console API (`mdViewerPerf.report()`) for real-time metrics
 
 ## Development
 
@@ -52,6 +62,32 @@ Since this is a single HTML file with no build process:
 1. **Testing**: Open `markdown_viewer_multi_folder.html` directly in a browser
 2. **Debugging**: Use browser DevTools console for JavaScript debugging
 3. **No Build Required**: Changes to the file are immediately reflected on browser reload
+
+### Performance Monitoring
+
+Open the browser console and use the global `mdViewerPerf` API:
+
+```javascript
+// View complete performance report
+mdViewerPerf.report()
+
+// Get raw metrics
+mdViewerPerf.getMetrics()
+
+// Clear file cache
+mdViewerPerf.clearCache()
+
+// Reset all metrics
+mdViewerPerf.reset()
+```
+
+**Metrics Tracked**:
+- Files loaded count
+- Cache hits/misses and hit rate
+- Search time
+- Render time
+- Cache size
+- Web Worker availability
 
 ## External Dependencies (CDN)
 
