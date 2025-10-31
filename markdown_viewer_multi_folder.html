@@ -179,6 +179,12 @@
       --md-sys-motion-slow: 350ms;
       --md-sys-motion-easing-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
       --md-sys-motion-easing-accelerate: cubic-bezier(0.4, 0.0, 1, 1);
+
+      /* M3 State Layer Opacities */
+      --md-sys-state-hover-opacity: 0.08;
+      --md-sys-state-focus-opacity: 0.12;
+      --md-sys-state-pressed-opacity: 0.12;
+      --md-sys-state-dragged-opacity: 0.16;
     }
     [data-theme="dark"] {
       /* M3 Primary Colors - Dark */
@@ -675,7 +681,7 @@
     }
     #fileTree summary:hover,
     #fileTree .file:hover {
-      background: rgba(25, 118, 210, 0.08);
+      background: color-mix(in srgb, var(--md-sys-color-primary) calc(var(--md-sys-state-hover-opacity) * 100%), transparent);
     }
     #fileTree .selected {
       background: var(--md-sys-color-primary);
