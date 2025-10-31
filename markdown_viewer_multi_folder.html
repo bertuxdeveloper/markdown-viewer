@@ -146,11 +146,7 @@
       transition: background 0.3s ease, color 0.3s ease;
     }
     header {
-      background: linear-gradient(180deg,
-        var(--md-sys-color-surface) 0%,
-        color-mix(in srgb, var(--md-sys-color-surface) 97%, var(--md-sys-color-primary)) 100%
-      );
-      backdrop-filter: blur(20px) saturate(180%);
+      background: var(--md-sys-color-surface);
       border-bottom: 1px solid var(--md-sys-color-outline);
       display: flex;
       align-items: center;
@@ -199,7 +195,8 @@
       height: 300px;
     }
     button:hover {
-      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      background: var(--md-sys-color-primary);
+      color: white;
       box-shadow: var(--md-sys-elevation-2);
       transform: translateY(-1px);
     }
@@ -217,11 +214,7 @@
       min-width: 200px;
       max-width: 600px;
       border-right: 1px solid var(--md-sys-color-outline);
-      background: linear-gradient(180deg,
-        color-mix(in srgb, var(--md-sys-color-surface) 98%, transparent) 0%,
-        var(--md-sys-color-surface) 100%
-      );
-      backdrop-filter: blur(10px) saturate(150%);
+      background: var(--md-sys-color-surface);
       padding: 16px;
       overflow-y: auto;
       position: relative;
@@ -347,7 +340,7 @@
       flex: 1;
     }
     .folder-count {
-      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      background: var(--md-sys-color-primary);
       color: white;
       font-size: 10px;
       padding: 3px 7px;
@@ -427,8 +420,7 @@
     .tree-stats {
       margin-top: 12px;
       padding: 12px;
-      background: color-mix(in srgb, var(--md-sys-color-surface-variant) 90%, transparent);
-      backdrop-filter: blur(10px);
+      background: var(--md-sys-color-surface-variant);
       border-radius: var(--md-sys-radius-lg);
       font-size: 11px;
       color: var(--md-sys-color-on-surface);
@@ -462,9 +454,9 @@
       background: rgba(25, 118, 210, 0.08);
     }
     #fileTree .selected {
-      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      background: var(--md-sys-color-primary);
       color: white;
-      box-shadow: var(--md-sys-elevation-2), 0 0 0 1px rgba(33, 150, 243, 0.2);
+      box-shadow: var(--md-sys-elevation-2);
       transform: translateX(2px) scale(1.01);
       font-weight: 500;
     }
@@ -498,9 +490,8 @@
       top: 60px;
       bottom: 0;
       width: 300px;
-      background: color-mix(in srgb, var(--md-sys-color-surface) 95%, transparent);
-      backdrop-filter: blur(20px) saturate(180%);
-      border-left: 1px solid color-mix(in srgb, var(--md-sys-color-outline) 50%, transparent);
+      background: var(--md-sys-color-surface);
+      border-left: 1px solid var(--md-sys-color-outline);
       padding: 24px;
       overflow-y: auto;
       transition: right var(--md-sys-motion-medium) var(--md-sys-motion-easing-standard);
@@ -719,15 +710,13 @@
       align-items: center;
       justify-content: center;
       z-index: 10001;
-      backdrop-filter: blur(8px);
       animation: modalFadeIn var(--md-sys-motion-medium) var(--md-sys-motion-easing-decelerate);
     }
     #settingsPanel.show {
       display: flex;
     }
     .settings-content {
-      background: color-mix(in srgb, var(--md-sys-color-surface) 98%, transparent);
-      backdrop-filter: blur(20px) saturate(180%);
+      background: var(--md-sys-color-surface);
       border-radius: var(--md-sys-radius-xl);
       width: 90%;
       max-width: 600px;
@@ -906,7 +895,7 @@
       opacity: 0.7;
     }
     .section-count {
-      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      background: var(--md-sys-color-primary);
       color: white;
       font-size: 10px;
       padding: 3px 7px;
@@ -1126,15 +1115,13 @@
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      backdrop-filter: blur(8px);
       animation: modalFadeIn var(--md-sys-motion-medium) var(--md-sys-motion-easing-decelerate);
     }
     #loadingOverlay.show {
       display: flex;
     }
     .loading-content {
-      background: color-mix(in srgb, var(--md-sys-color-surface) 95%, transparent);
-      backdrop-filter: blur(20px) saturate(180%);
+      background: var(--md-sys-color-surface);
       padding: 32px 48px;
       border-radius: var(--md-sys-radius-xl);
       text-align: center;
@@ -1172,8 +1159,7 @@
       pointer-events: none;
     }
     .toast {
-      background: color-mix(in srgb, var(--md-sys-color-surface) 95%, transparent);
-      backdrop-filter: blur(20px) saturate(180%);
+      background: var(--md-sys-color-surface);
       color: var(--md-sys-color-on-surface);
       padding: 16px 24px;
       border-radius: var(--md-sys-radius-lg);
@@ -1428,7 +1414,6 @@
       align-items: center;
       justify-content: center;
       z-index: 10002;
-      backdrop-filter: blur(4px);
     }
     #batchExportModal.show {
       display: flex;
