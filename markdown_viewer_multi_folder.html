@@ -828,65 +828,6 @@
       margin-left: 4px;
       opacity: 0.8;
     }
-    /* Tree Toolbar */
-    .tree-toolbar {
-      display: flex;
-      gap: 4px;
-      padding: 8px 0;
-      margin-bottom: 8px;
-      border-bottom: 1px solid var(--md-sys-color-outline);
-    }
-    .tree-toolbar button {
-      flex: 1;
-      padding: 8px;
-      min-height: 36px;
-      font-size: var(--md-sys-typescale-label-small-font-size);
-      font-weight: 600;
-      background: var(--md-sys-color-surface-container);
-      color: var(--md-sys-color-on-surface);
-      border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: var(--md-sys-shape-corner-small);
-      cursor: pointer;
-      transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      box-shadow: none;
-    }
-    .tree-toolbar button:hover {
-      background: var(--md-sys-color-surface-container-high);
-      border-color: var(--md-sys-color-outline);
-      box-shadow: var(--md-sys-elevation-1);
-    }
-    .tree-toolbar button:active {
-      transform: scale(0.96);
-      background: var(--md-sys-color-surface-container-highest);
-    }
-    /* Tree Statistics Footer */
-    .tree-stats {
-      margin-top: 12px;
-      padding: 12px;
-      background: var(--md-sys-color-surface-variant);
-      border-radius: var(--md-sys-radius-lg);
-      font-size: 11px;
-      color: var(--md-sys-color-on-surface);
-      border: 1px solid var(--md-sys-color-outline);
-      box-shadow: var(--md-sys-elevation-1);
-    }
-    .tree-stats-line {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 2px 0;
-    }
-    .tree-stats-line:not(:last-child) {
-      margin-bottom: 4px;
-    }
-    .tree-stats-value {
-      font-weight: 600;
-      color: var(--md-sys-color-primary);
-    }
     /* Active Path Highlighting - Premium */
     #fileTree .in-active-path > summary {
       background: var(--md-sys-color-primary-container);
@@ -1168,23 +1109,217 @@
       margin: 16px 0;
     }
     /* Full-text search */
-    #searchMode {
+    /* Sidebar Tabs */
+    .sidebar-tabs {
       display: flex;
-      gap: 4px;
-      margin-bottom: 8px;
+      gap: 0;
+      margin: -16px -16px 16px -16px;
+      padding: 0;
+      background: var(--md-sys-color-surface-container-highest);
+      border-bottom: 2px solid var(--md-sys-color-outline-variant);
     }
-    #searchMode button {
+    .sidebar-tab {
       flex: 1;
-      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px 12px;
+      background: transparent;
+      color: var(--md-sys-color-on-surface-variant);
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+      font-size: var(--md-sys-typescale-title-small-font-size);
+      font-weight: 500;
+      position: relative;
+      margin-bottom: -2px;
+    }
+    .sidebar-tab:hover {
+      background: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-on-surface);
+    }
+    .sidebar-tab.active {
+      background: var(--md-sys-color-surface-container);
+      color: var(--md-sys-color-primary);
+      border-bottom-color: var(--md-sys-color-primary);
+      font-weight: 600;
+    }
+    .tab-icon {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+    .sidebar-tab.active .tab-icon {
+      opacity: 1;
+    }
+    .tab-label {
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+    .tab-badge {
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: var(--md-sys-shape-corner-full);
+      min-width: 18px;
+      text-align: center;
+      line-height: 1;
+    }
+    .sidebar-tab.active .tab-badge {
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+    }
+
+    /* Tab Panels */
+    .tab-panel {
+      display: block;
+      animation: fadeIn var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-decelerate);
+    }
+    .tab-panel[hidden] {
+      display: none;
+    }
+
+    /* Actions Dropdown */
+    .sidebar-actions {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .actions-menu-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-on-surface);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: var(--md-sys-shape-corner-medium);
+      cursor: pointer;
+      font-size: var(--md-sys-typescale-body-medium-font-size);
+      font-weight: 500;
+      transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+    }
+    .actions-menu-btn:hover {
+      background: var(--md-sys-color-surface-container-highest);
+      border-color: var(--md-sys-color-outline);
+    }
+    .dropdown-arrow {
       font-size: 12px;
+      opacity: 0.7;
+      transition: transform var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-emphasized);
+    }
+    .actions-menu-btn[aria-expanded="true"] .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+    .actions-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 4px;
+      background: var(--md-sys-color-surface-container-high);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: var(--md-sys-shape-corner-medium);
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.12),
+        0 2px 4px rgba(0, 0, 0, 0.08);
+      z-index: 100;
+      overflow: hidden;
+      animation: slideDown var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-decelerate);
+    }
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .action-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
       background: transparent;
       color: var(--md-sys-color-on-surface);
-      border: 1px solid var(--md-sys-color-outline);
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      transition: background var(--md-sys-motion-duration-short1) var(--md-sys-motion-easing-standard);
+      font-size: var(--md-sys-typescale-body-medium-font-size);
     }
-    #searchMode button.active {
-      background: var(--md-sys-color-primary);
-      color: white;
-      border-color: var(--md-sys-color-primary);
+    .action-item:hover {
+      background: var(--md-sys-color-surface-container-highest);
+    }
+    .action-item:not(:last-child) {
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    }
+    .action-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      opacity: 0.8;
+    }
+    .action-label {
+      flex: 1;
+      font-weight: 400;
+    }
+
+    /* Favorites and Recent Lists */
+    .favorites-list,
+    .recent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .favorites-list .favorite-item,
+    .recent-list .recent-file-item {
+      margin: 0;
+      padding: 12px 16px 12px 40px;
+      background: var(--md-sys-color-surface-container-low);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: var(--md-sys-shape-corner-medium);
+    }
+    .favorites-list .favorite-item:hover,
+    .recent-list .recent-file-item:hover {
+      background: var(--md-sys-color-surface-container-high);
+      border-color: var(--md-sys-color-outline);
+      transform: translateX(4px);
+    }
+
+    /* Enhanced Empty States */
+    .tab-panel .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      text-align: center;
+      background: var(--md-sys-color-surface-container-low);
+      border: 2px dashed var(--md-sys-color-outline-variant);
+      border-radius: var(--md-sys-shape-corner-large);
+      margin: 16px 0;
+    }
+    .empty-icon {
+      font-size: 48px;
+      opacity: 0.3;
+      margin-bottom: 16px;
+    }
+    .empty-title {
+      font-size: var(--md-sys-typescale-title-medium-font-size);
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+      margin-bottom: 8px;
+    }
+    .empty-description {
+      font-size: var(--md-sys-typescale-body-small-font-size);
+      color: var(--md-sys-color-on-surface-variant);
     }
     .search-result {
       font-size: 12px;
@@ -1234,25 +1369,6 @@
       font-weight: 500;
     }
     /* Recent files */
-    #recentFiles {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--md-sys-color-outline);
-    }
-    #recentFiles h4 {
-      margin: 0 0 8px 0;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--md-sys-color-on-surface);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      opacity: 0.7;
-    }
-    #recentFilesList {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
     .recent-file-item {
       padding: 10px 12px 10px 32px;
       border-radius: var(--md-sys-shape-corner-small);
@@ -1451,166 +1567,6 @@
       font-weight: 500;
     }
     /* Favorites */
-    /* Sidebar Section Container */
-    #favoritesSection,
-    #recentFiles {
-      margin: 16px -16px;
-      padding: 0;
-      border: none;
-    }
-
-    /* Premium Section Headers - Pill Design */
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      padding: 10px 16px;
-      margin: 0 8px 8px 8px;
-      user-select: none;
-      background: var(--md-sys-color-surface-container-high);
-      border-radius: var(--md-sys-shape-corner-extra-large);
-      transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-emphasized);
-      box-shadow: var(--md-sys-elevation-0);
-      border: 1px solid var(--md-sys-color-outline-variant);
-      min-height: 48px;
-    }
-    .section-header:hover {
-      background: var(--md-sys-color-surface-container-highest);
-      box-shadow: var(--md-sys-elevation-1);
-      transform: scale(1.01);
-      border-color: var(--md-sys-color-outline);
-    }
-    .section-header:active {
-      transform: scale(0.99);
-      box-shadow: var(--md-sys-elevation-0);
-    }
-
-    /* Favorites Section - Warm Accent */
-    #favoritesSection .section-header {
-      background: linear-gradient(135deg,
-        rgba(255, 152, 0, 0.1) 0%,
-        var(--md-sys-color-surface-container-high) 100%
-      );
-      border-left: 3px solid #ff9800;
-    }
-    #favoritesSection .section-header:hover {
-      background: linear-gradient(135deg,
-        rgba(255, 152, 0, 0.15) 0%,
-        var(--md-sys-color-surface-container-highest) 100%
-      );
-    }
-
-    /* Recent Section - Cool Accent */
-    #recentFiles .section-header {
-      background: linear-gradient(135deg,
-        rgba(156, 39, 176, 0.1) 0%,
-        var(--md-sys-color-surface-container-high) 100%
-      );
-      border-left: 3px solid #9c27b0;
-    }
-    #recentFiles .section-header:hover {
-      background: linear-gradient(135deg,
-        rgba(156, 39, 176, 0.15) 0%,
-        var(--md-sys-color-surface-container-highest) 100%
-      );
-    }
-
-    /* Section Title with Icon */
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: var(--md-sys-typescale-title-small-font-size);
-      font-weight: 600;
-      color: var(--md-sys-color-on-surface);
-      letter-spacing: 0.1px;
-    }
-    .section-title > span:first-child {
-      font-size: 20px;
-      line-height: 1;
-      opacity: 0.9;
-      transition: transform var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-emphasized);
-    }
-    .section-header:hover .section-title > span:first-child {
-      transform: scale(1.15);
-    }
-
-    /* Integrated Count Badge */
-    .section-count {
-      background: var(--md-sys-color-primary-container);
-      color: var(--md-sys-color-on-primary-container);
-      font-size: var(--md-sys-typescale-label-medium-font-size);
-      padding: 4px 10px;
-      border-radius: var(--md-sys-shape-corner-full);
-      font-weight: 700;
-      min-width: 24px;
-      text-align: center;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-      line-height: 1;
-      transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-emphasized);
-    }
-    .section-header:hover .section-count {
-      transform: scale(1.1);
-      box-shadow: 0 2px 6px rgba(103, 80, 164, 0.25);
-    }
-
-    /* Expand/Collapse Toggle */
-    .section-toggle {
-      font-size: 14px;
-      opacity: 0.7;
-      transition: transform var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-emphasized);
-      line-height: 1;
-    }
-    .section-toggle.collapsed {
-      transform: rotate(-90deg);
-    }
-
-    /* Section Content - Recessed Look */
-    .section-content {
-      max-height: 600px;
-      overflow: hidden;
-      transition: max-height var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized-decelerate),
-                  opacity var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard),
-                  padding var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
-      background: var(--md-sys-color-surface-container-low);
-      padding: 12px 16px;
-      margin: 0 8px 16px 8px;
-      border-radius: var(--md-sys-shape-corner-large);
-      border: 1px solid var(--md-sys-color-outline-variant);
-    }
-    .section-content.collapsed {
-      max-height: 0;
-      opacity: 0;
-      padding: 0 16px;
-      margin: 0 8px;
-      border-color: transparent;
-    }
-    .empty-state {
-      font-size: var(--md-sys-typescale-body-medium-font-size);
-      line-height: var(--md-sys-typescale-body-medium-line-height);
-      color: var(--md-sys-color-on-surface-variant);
-      padding: 24px 16px;
-      text-align: center;
-      background: var(--md-sys-color-surface-container-low);
-      border-radius: var(--md-sys-radius-md);
-      margin: 8px 0;
-      border: 1px dashed var(--md-sys-color-outline-variant);
-    }
-    #favoritesSection h4 {
-      margin: 0 0 8px 0;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--md-sys-color-on-surface);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      opacity: 0.7;
-    }
-    #favoritesList {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
     .favorite-item {
       padding: 10px 12px 10px 32px;
       border-radius: var(--md-sys-shape-corner-small);
@@ -2298,73 +2254,81 @@
   <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
   <main role="main">
     <aside id="sidebar" role="navigation" aria-label="File tree navigation">
-      <div id="searchMode">
-        <button id="searchFilenameBtn" class="active" title="Search by filename">Name</button>
-        <button id="searchContentBtn" title="Search in file contents">Content</button>
+      <!-- Tab Navigation -->
+      <div class="sidebar-tabs" role="tablist">
+        <button class="sidebar-tab active" id="tabAllFiles" role="tab" aria-selected="true" aria-controls="panelAllFiles">
+          <span class="tab-icon">▦</span>
+          <span class="tab-label">All Files</span>
+        </button>
+        <button class="sidebar-tab" id="tabFavorites" role="tab" aria-selected="false" aria-controls="panelFavorites">
+          <span class="tab-icon">★</span>
+          <span class="tab-label">Favorites</span>
+          <span class="tab-badge" id="favoritesCount">0</span>
+        </button>
+        <button class="sidebar-tab" id="tabRecent" role="tab" aria-selected="false" aria-controls="panelRecent">
+          <span class="tab-icon">◷</span>
+          <span class="tab-label">Recent</span>
+          <span class="tab-badge" id="recentCount">0</span>
+        </button>
       </div>
+
+      <!-- Unified Search -->
       <div class="search-container">
-        <input id="searchBox" type="search" placeholder="Search files (Press /)">
+        <input id="searchBox" type="search" placeholder="Search files and content...">
         <button class="search-clear" id="searchClear" title="Clear search" aria-label="Clear search">✕</button>
         <div class="search-loading" id="searchLoading">⏳</div>
       </div>
       <div id="searchResults" class="search-result"></div>
-      <div id="favoritesSection">
-        <div class="section-header" id="favoritesHeader">
-          <div class="section-title">
-            <span>📌 Favorites</span>
-            <span class="section-count" id="favoritesCount">0</span>
-          </div>
-          <span class="section-toggle" id="favoritesToggle">▼</span>
-        </div>
-        <div class="section-content" id="favoritesContent">
-          <div id="favoritesList"></div>
-        </div>
-      </div>
-      <div id="recentFiles">
-        <div class="section-header" id="recentHeader">
-          <div class="section-title">
-            <span>🕐 Recent Files</span>
-            <span class="section-count" id="recentCount">0</span>
-          </div>
-          <span class="section-toggle" id="recentToggle">▼</span>
-        </div>
-        <div class="section-content" id="recentContent">
-          <div id="recentFilesList"></div>
-        </div>
-      </div>
-      <!-- Tree Toolbar -->
-      <div class="tree-toolbar">
-        <button id="treeSortBtn" title="Toggle sort order">
-          <span id="treeSortIcon">↕️</span>
-          <span id="treeSortLabel">A-Z</span>
+
+      <!-- Actions Dropdown -->
+      <div class="sidebar-actions">
+        <button id="actionsMenuBtn" class="actions-menu-btn" aria-haspopup="menu" aria-expanded="false">
+          <span>Actions</span>
+          <span class="dropdown-arrow">▾</span>
         </button>
-        <button id="treeExpandBtn" title="Expand all folders">📂 All</button>
-        <button id="treeCollapseBtn" title="Collapse all folders">📁 None</button>
-        <button id="treeRefreshBtn" title="Refresh tree">🔄</button>
-      </div>
-      <div id="fileTree"></div>
-      <!-- Tree Statistics -->
-      <div class="tree-stats" id="treeStats">
-        <div class="tree-stats-line">
-          <span>📄</span>
-          <span id="statsFiles" class="tree-stats-value">0</span>
-          <span>files in</span>
-          <span id="statsFolders" class="tree-stats-value">0</span>
-          <span>folders</span>
-        </div>
-        <div class="tree-stats-line">
-          <span>⭐</span>
-          <span id="statsFavorites" class="tree-stats-value">0</span>
-          <span>favorites ·</span>
-          <span>🕐</span>
-          <span id="statsRecent" class="tree-stats-value">0</span>
-          <span>recent</span>
-        </div>
-        <div class="tree-stats-line" id="statsSearchLine" style="display: none;">
-          <span>🔍</span>
-          <span id="statsSearchText">Showing all files</span>
+        <div id="actionsMenu" class="actions-menu" role="menu" hidden>
+          <button class="action-item" id="treeSortBtn" role="menuitem">
+            <span class="action-icon">↕</span>
+            <span class="action-label">Sort: <span id="treeSortLabel">A-Z</span></span>
+          </button>
+          <button class="action-item" id="treeExpandBtn" role="menuitem">
+            <span class="action-icon">▾</span>
+            <span class="action-label">Expand All</span>
+          </button>
+          <button class="action-item" id="treeCollapseBtn" role="menuitem">
+            <span class="action-icon">▸</span>
+            <span class="action-label">Collapse All</span>
+          </button>
+          <button class="action-item" id="treeRefreshBtn" role="menuitem">
+            <span class="action-icon">↻</span>
+            <span class="action-label">Refresh</span>
+          </button>
         </div>
       </div>
+
+      <!-- Tab Panels -->
+      <div class="tab-panel active" id="panelAllFiles" role="tabpanel" aria-labelledby="tabAllFiles">
+        <div id="fileTree"></div>
+      </div>
+
+      <div class="tab-panel" id="panelFavorites" role="tabpanel" aria-labelledby="tabFavorites" hidden>
+        <div id="favoritesList" class="favorites-list"></div>
+        <div class="empty-state" id="favoritesEmpty" style="display: none;">
+          <div class="empty-icon">★</div>
+          <div class="empty-title">No favorites yet</div>
+          <div class="empty-description">Star files to quick access them here</div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panelRecent" role="tabpanel" aria-labelledby="tabRecent" hidden>
+        <div id="recentFilesList" class="recent-list"></div>
+        <div class="empty-state" id="recentEmpty" style="display: none;">
+          <div class="empty-icon">◷</div>
+          <div class="empty-title">No recent files</div>
+          <div class="empty-description">Recently opened files will appear here</div>
+        </div>
+      </div>
+
       <div class="resize-handle" id="resizeHandle"></div>
     </aside>
     <section id="dropZone" style="position:relative;" role="region" aria-label="Document viewer">
@@ -2704,32 +2668,28 @@
       tocPanel: document.getElementById('tocPanel'),
       tocList: document.getElementById('tocList'),
       tocClose: document.getElementById('tocClose'),
-      searchFilenameBtn: document.getElementById('searchFilenameBtn'),
-      searchContentBtn: document.getElementById('searchContentBtn'),
       searchResults: document.getElementById('searchResults'),
       searchClear: document.getElementById('searchClear'),
       searchLoading: document.getElementById('searchLoading'),
-      favoritesHeader: document.getElementById('favoritesHeader'),
-      favoritesToggle: document.getElementById('favoritesToggle'),
+      // Sidebar tabs
+      tabAllFiles: document.getElementById('tabAllFiles'),
+      tabFavorites: document.getElementById('tabFavorites'),
+      tabRecent: document.getElementById('tabRecent'),
+      panelAllFiles: document.getElementById('panelAllFiles'),
+      panelFavorites: document.getElementById('panelFavorites'),
+      panelRecent: document.getElementById('panelRecent'),
       favoritesCount: document.getElementById('favoritesCount'),
-      favoritesContent: document.getElementById('favoritesContent'),
-      recentHeader: document.getElementById('recentHeader'),
-      recentToggle: document.getElementById('recentToggle'),
       recentCount: document.getElementById('recentCount'),
-      recentContent: document.getElementById('recentContent'),
+      favoritesEmpty: document.getElementById('favoritesEmpty'),
+      recentEmpty: document.getElementById('recentEmpty'),
+      // Actions dropdown
+      actionsMenuBtn: document.getElementById('actionsMenuBtn'),
+      actionsMenu: document.getElementById('actionsMenu'),
       treeSortBtn: document.getElementById('treeSortBtn'),
-      treeSortIcon: document.getElementById('treeSortIcon'),
       treeSortLabel: document.getElementById('treeSortLabel'),
       treeExpandBtn: document.getElementById('treeExpandBtn'),
       treeCollapseBtn: document.getElementById('treeCollapseBtn'),
       treeRefreshBtn: document.getElementById('treeRefreshBtn'),
-      treeStats: document.getElementById('treeStats'),
-      statsFiles: document.getElementById('statsFiles'),
-      statsFolders: document.getElementById('statsFolders'),
-      statsFavorites: document.getElementById('statsFavorites'),
-      statsRecent: document.getElementById('statsRecent'),
-      statsSearchLine: document.getElementById('statsSearchLine'),
-      statsSearchText: document.getElementById('statsSearchText'),
       breadcrumbNav: document.getElementById('breadcrumbNav'),
       recentFilesList: document.getElementById('recentFilesList'),
       favoritesList: document.getElementById('favoritesList'),
@@ -3386,12 +3346,12 @@
       // Update count
       DOM.recentCount.textContent = validRecentFiles.length;
 
+      // Update empty state visibility
+      if (DOM.recentEmpty) {
+        DOM.recentEmpty.style.display = (validRecentFiles.length === 0 || !tree) ? 'flex' : 'none';
+      }
+
       if (validRecentFiles.length === 0 || !tree) {
-        // Show empty state
-        const emptyState = document.createElement('div');
-        emptyState.className = 'empty-state';
-        emptyState.textContent = 'Recently opened files will appear here';
-        DOM.recentFilesList.appendChild(emptyState);
         return;
       }
 
@@ -3409,6 +3369,10 @@
         }
       });
     }
+
+    // Helper functions for tab displays
+    const updateFavoritesDisplay = () => renderFavorites();
+    const updateRecentDisplay = () => renderRecentFiles();
 
     /**
      * Renders breadcrumb navigation for current file
@@ -3496,12 +3460,12 @@
       const validFavorites = favorites.filter(path => allFileNodes.find(n => n.path === path));
       DOM.favoritesCount.textContent = validFavorites.length;
 
+      // Update empty state visibility
+      if (DOM.favoritesEmpty) {
+        DOM.favoritesEmpty.style.display = (validFavorites.length === 0 || !tree) ? 'flex' : 'none';
+      }
+
       if (validFavorites.length === 0 || !tree) {
-        // Show empty state
-        const emptyState = document.createElement('div');
-        emptyState.className = 'empty-state';
-        emptyState.textContent = 'No favorites yet. Click ⭐ to add files.';
-        DOM.favoritesList.appendChild(emptyState);
         return;
       }
 
@@ -5067,9 +5031,64 @@ ${content}`;
       }
     };
 
-    // Search mode buttons
-    DOM.searchFilenameBtn.onclick = () => setSearchMode('filename');
-    DOM.searchContentBtn.onclick = () => setSearchMode('content');
+    // Sidebar tab switching
+    const switchTab = (tabId) => {
+      // Remove active class from all tabs and panels
+      [DOM.tabAllFiles, DOM.tabFavorites, DOM.tabRecent].forEach(tab => {
+        tab.classList.remove('active');
+        tab.setAttribute('aria-selected', 'false');
+      });
+      [DOM.panelAllFiles, DOM.panelFavorites, DOM.panelRecent].forEach(panel => {
+        panel.classList.remove('active');
+        panel.hidden = true;
+      });
+
+      // Activate clicked tab and panel
+      const tabMap = {
+        'tabAllFiles': { tab: DOM.tabAllFiles, panel: DOM.panelAllFiles },
+        'tabFavorites': { tab: DOM.tabFavorites, panel: DOM.panelFavorites },
+        'tabRecent': { tab: DOM.tabRecent, panel: DOM.panelRecent }
+      };
+
+      if (tabMap[tabId]) {
+        tabMap[tabId].tab.classList.add('active');
+        tabMap[tabId].tab.setAttribute('aria-selected', 'true');
+        tabMap[tabId].panel.classList.add('active');
+        tabMap[tabId].panel.hidden = false;
+      }
+
+      // Update empty state visibility
+      updateFavoritesDisplay();
+      updateRecentDisplay();
+    };
+
+    DOM.tabAllFiles.onclick = () => switchTab('tabAllFiles');
+    DOM.tabFavorites.onclick = () => switchTab('tabFavorites');
+    DOM.tabRecent.onclick = () => switchTab('tabRecent');
+
+    // Actions dropdown toggle
+    DOM.actionsMenuBtn.onclick = (e) => {
+      e.stopPropagation();
+      const isOpen = !DOM.actionsMenu.hidden;
+      DOM.actionsMenu.hidden = !isOpen;
+      DOM.actionsMenuBtn.setAttribute('aria-expanded', !isOpen);
+    };
+
+    // Close actions dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!DOM.actionsMenuBtn.contains(e.target) && !DOM.actionsMenu.contains(e.target)) {
+        DOM.actionsMenu.hidden = true;
+        DOM.actionsMenuBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Close dropdown after clicking an action
+    [DOM.treeSortBtn, DOM.treeExpandBtn, DOM.treeCollapseBtn, DOM.treeRefreshBtn].forEach(btn => {
+      btn.addEventListener('click', () => {
+        DOM.actionsMenu.hidden = true;
+        DOM.actionsMenuBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
 
     // Settings panel
     DOM.settingsBtn.onclick = openSettings;
@@ -5278,29 +5297,6 @@ ${content}`;
       }
     }
 
-    // Initialize section states from localStorage
-    const favoritesCollapsed = localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES_COLLAPSED) === 'true';
-    const recentCollapsed = localStorage.getItem(CONFIG.STORAGE_KEYS.RECENT_COLLAPSED) === 'true';
-
-    if (favoritesCollapsed) {
-      DOM.favoritesContent.classList.add('collapsed');
-      DOM.favoritesToggle.classList.add('collapsed');
-    }
-
-    if (recentCollapsed) {
-      DOM.recentContent.classList.add('collapsed');
-      DOM.recentToggle.classList.add('collapsed');
-    }
-
-    // Favorites section toggle
-    DOM.favoritesHeader.onclick = () => {
-      toggleSection(CONFIG.STORAGE_KEYS.FAVORITES_COLLAPSED, DOM.favoritesContent, DOM.favoritesToggle);
-    };
-
-    // Recent files section toggle
-    DOM.recentHeader.onclick = () => {
-      toggleSection(CONFIG.STORAGE_KEYS.RECENT_COLLAPSED, DOM.recentContent, DOM.recentToggle);
-    };
 
     // ============================================================================
     // SEARCH ENHANCEMENTS
