@@ -91,6 +91,14 @@
       --md-sys-radius-xl: 16px;
       --md-sys-radius-pill: 9999px;
 
+      /* Spacing System - 8px base */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-xxl: 48px;
+
       /* M3 Typography System */
       /* Display */
       --md-sys-typescale-display-large-font-size: 57px;
@@ -379,63 +387,40 @@
       transition: background 0.3s ease, color 0.3s ease;
     }
 
-    /* Premium Gradient Header */
+    /* Modern Clean Header */
     header {
-      background: linear-gradient(135deg,
-        #667eea 0%,
-        #764ba2 50%,
-        #f093fb 100%
-      );
-      border-bottom: none;
+      background: var(--md-sys-color-surface-container);
+      border-bottom: 2px solid var(--md-sys-color-primary);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 32px;
-      height: 64px;
-      box-shadow:
-        0 2px 8px rgba(102, 126, 234, 0.2),
-        0 8px 24px rgba(118, 75, 162, 0.15),
-        0 1px 0 rgba(255, 255, 255, 0.1) inset;
-      position: relative;
-      z-index: 100;
-      overflow: hidden;
-    }
-    header::before {
-      content: '';
-      position: absolute;
+      padding: 12px 24px;
+      height: 56px;
+      position: sticky;
       top: 0;
-      left: -100%;
-      width: 200%;
-      height: 100%;
-      background: linear-gradient(90deg,
-        transparent,
-        rgba(255, 255, 255, 0.1),
-        transparent
-      );
-      animation: shimmer 3s infinite;
-      pointer-events: none;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      transition: box-shadow var(--md-sys-motion-duration-short2);
     }
-    @keyframes shimmer {
-      0% { left: -100%; }
-      100% { left: 100%; }
+
+    header:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
+
     header h1 {
-      font-weight: 700;
-      font-size: 24px;
-      color: #ffffff;
+      font-weight: 600;
+      font-size: 20px;
+      color: var(--md-sys-color-on-surface);
       margin: 0;
-      letter-spacing: -0.5px;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      letter-spacing: -0.3px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      position: relative;
-      z-index: 1;
+      gap: 10px;
     }
+
     header h1::before {
-      content: '◈';
-      font-size: 28px;
-      opacity: 0.9;
+      content: '📝';
+      font-size: 20px;
     }
     /* M3 Button Base Styles */
     button {
@@ -469,11 +454,8 @@
     button:hover,
     .btn-filled:hover {
       background: var(--md-sys-color-primary);
-      box-shadow:
-        0 2px 4px rgba(0, 0, 0, 0.1),
-        0 4px 8px rgba(0, 0, 0, 0.12),
-        0 0 16px rgba(103, 80, 164, 0.3);
-      transform: translateY(-2px);
+      box-shadow: var(--md-sys-elevation-2);
+      transform: translateY(-1px);
     }
     button:active,
     .btn-filled:active {
@@ -556,12 +538,13 @@
       width: 320px;
       min-width: 200px;
       max-width: 600px;
-      border-right: 1px solid var(--md-sys-color-outline);
-      background: var(--md-sys-color-surface-container);
-      padding: 16px;
+      border-right: 1px solid var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface);
+      padding: 0;
       overflow-y: auto;
       position: relative;
-      box-shadow: var(--md-sys-elevation-1);
+      box-shadow: none;
+      transition: width 0.3s var(--md-sys-motion-easing-emphasized);
     }
     .resize-handle {
       position: absolute;
@@ -580,7 +563,7 @@
     }
     section {
       flex: 1;
-      padding: 32px;
+      padding: 48px 32px;
       overflow-y: auto;
       background: var(--md-sys-color-background);
       display: flex;
@@ -601,34 +584,29 @@
     input[type="search"] {
       width: 100%;
       padding: 12px 40px 12px 16px;
-      border: 1px solid var(--md-sys-color-outline);
-      background: var(--md-sys-color-surface-container-highest);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface);
       color: var(--md-sys-color-on-surface);
       border-radius: var(--md-sys-shape-corner-large);
       font-size: var(--md-sys-typescale-body-medium-font-size);
       line-height: var(--md-sys-typescale-body-medium-line-height);
       transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
-      box-shadow:
-        inset 0 1px 2px rgba(0, 0, 0, 0.1),
-        inset 0 2px 4px rgba(0, 0, 0, 0.06);
+      box-shadow: none;
     }
     input[type="search"]::placeholder {
       color: var(--md-sys-color-on-surface-variant);
       opacity: 0.7;
     }
     input[type="search"]:hover {
-      background: var(--md-sys-color-surface-container);
-      border-color: var(--md-sys-color-on-surface-variant);
+      border-color: var(--md-sys-color-outline);
+      background: var(--md-sys-color-surface-container-lowest);
     }
     input[type="search"]:focus {
       outline: none;
-      background: var(--md-sys-color-surface-container-highest);
-      border-color: var(--md-sys-color-primary);
-      box-shadow:
-        inset 0 1px 2px rgba(0, 0, 0, 0.1),
-        inset 0 2px 4px rgba(0, 0, 0, 0.06),
-        0 0 0 3px rgba(103, 80, 164, 0.2),
-        0 0 12px rgba(103, 80, 164, 0.3);
+      border: 2px solid var(--md-sys-color-primary);
+      padding: 11px 39px 11px 15px;
+      background: var(--md-sys-color-surface);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
     }
     .search-clear {
       position: absolute;
@@ -701,71 +679,61 @@
     #fileTree details summary {
       list-style: none;
       position: relative;
-      padding: 8px 10px 8px 28px;
+      padding: 10px 10px 10px 28px;
       cursor: pointer;
       border-radius: var(--md-sys-shape-corner-small);
       transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-emphasized);
       display: flex;
       align-items: center;
       gap: 8px;
-      margin: 2px 0;
+      margin: 1px 0;
+      min-height: 40px;
     }
 
-    /* Clean Folder Icons */
+    /* Breathing room between different folders */
+    #fileTree details + details {
+      margin-top: 4px;
+    }
+
+    /* Breathing room for nested content */
+    #fileTree details[open] {
+      margin-bottom: 4px;
+    }
+
+    /* Modern Folder Icons */
     #fileTree details summary::before {
-      content: "▸";
-      position: absolute;
-      left: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 12px;
-      color: var(--md-sys-color-on-surface-variant);
-      transition: transform var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-emphasized);
-      font-weight: 700;
-    }
-    #fileTree details[open] > summary::before {
-      transform: translateY(-50%) rotate(90deg);
-      color: var(--md-sys-color-primary);
-    }
-    #fileTree details summary::after {
-      content: "⌨";
+      content: "📁";
       position: absolute;
       left: 8px;
       top: 50%;
       transform: translateY(-50%);
       font-size: 16px;
-      color: #2196f3;
-      opacity: 0.7;
-      transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+      transition: transform var(--md-sys-motion-duration-short2);
     }
-    #fileTree details[open] > summary::after {
-      content: "⌨";
-      color: #1976d2;
-      opacity: 0.9;
-    }
-    #fileTree details summary:hover::after {
-      transform: translateY(-50%) scale(1.1);
-      opacity: 1;
-      filter: drop-shadow(0 0 2px rgba(33, 150, 243, 0.5));
+
+    #fileTree details[open] > summary::before {
+      content: "📂";
     }
     .folder-name {
       flex: 1;
     }
     .folder-count {
-      background: var(--md-sys-color-primary-container);
-      color: var(--md-sys-color-on-primary-container);
-      font-size: var(--md-sys-typescale-label-small-font-size);
-      padding: 2px 8px;
-      border-radius: var(--md-sys-shape-corner-full);
-      font-weight: 600;
+      background: var(--md-sys-color-surface-container-highest);
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: var(--md-sys-shape-corner-small);
       min-width: 20px;
       text-align: center;
-      transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-emphasized);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      transition: all var(--md-sys-motion-duration-short2);
     }
     #fileTree details:hover .folder-count {
-      transform: scale(1.05);
-      box-shadow: 0 2px 4px rgba(103, 80, 164, 0.2);
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+    }
+    #fileTree details[open] .folder-count {
+      opacity: 0.7;
     }
     /* Enhanced File Items */
     #fileTree .file {
@@ -773,95 +741,79 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 9px 12px 9px 32px;
+      padding: 10px 12px 10px 32px;
       border-radius: var(--md-sys-shape-corner-small);
       transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-emphasized);
       cursor: pointer;
       font-size: var(--md-sys-typescale-body-medium-font-size);
       line-height: var(--md-sys-typescale-body-medium-line-height);
-      margin: 2px 0;
+      margin: 1px 0;
+      min-height: 40px;
       position: relative;
       border: 1px solid transparent;
     }
 
-    /* Clean File Icons */
+    /* Modern File Icons */
     #fileTree .file::before {
-      content: "◆";
+      content: "📄";
       position: absolute;
       left: 12px;
-      font-size: 10px;
-      color: #4caf50;
-      opacity: 0.7;
-      transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-emphasized);
+      font-size: 14px;
+      opacity: 0.85;
+      transition: opacity var(--md-sys-motion-duration-short2);
     }
+
     #fileTree .file:hover::before {
-      transform: scale(1.3);
       opacity: 1;
-      color: #2e7d32;
-      filter: drop-shadow(0 0 2px rgba(76, 175, 80, 0.5));
     }
 
     /* README files - Special styling */
     #fileTree .file.readme {
-      font-weight: 600;
-      background: linear-gradient(90deg,
-        rgba(103, 58, 183, 0.08) 0%,
-        transparent 100%
-      );
-      border-left: 2px solid #673ab7;
+      font-weight: 500;
+      background: var(--md-sys-color-tertiary-container);
+      color: var(--md-sys-color-on-tertiary-container);
+      border-left: 3px solid var(--md-sys-color-tertiary);
     }
+
     #fileTree .file.readme::before {
-      content: "▣";
-      color: #673ab7;
+      content: "📖";
       opacity: 1;
-      font-size: 12px;
+      font-size: 14px;
     }
+
     #fileTree .file.readme:hover {
-      background: linear-gradient(90deg,
-        rgba(103, 58, 183, 0.12) 0%,
-        transparent 100%
-      );
-      box-shadow: 0 2px 8px rgba(103, 58, 183, 0.15);
+      background: var(--md-sys-color-tertiary-container);
+      opacity: 0.9;
     }
     .file-favorite-indicator {
       font-size: 11px;
       margin-left: 4px;
       opacity: 0.8;
     }
-    /* Active Path Highlighting - Premium */
+    /* Active Path Highlighting */
     #fileTree .in-active-path > summary {
-      background: var(--md-sys-color-primary-container);
-      color: var(--md-sys-color-on-primary-container);
-      border-left: 3px solid var(--md-sys-color-primary);
-      padding-left: 25px;
+      background: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-on-surface);
+      border-left: 2px solid var(--md-sys-color-primary);
+      padding-left: 26px;
       font-weight: 500;
     }
-    #fileTree .in-active-path > summary::after {
-      color: var(--md-sys-color-primary);
-      opacity: 1;
-    }
 
-    /* Hover States - Smooth and Subtle */
+    /* Hover States - Clean and Simple */
     #fileTree summary:hover,
     #fileTree .file:hover {
       background: var(--md-sys-color-surface-container-highest);
-      transform: translateX(2px);
     }
 
-    /* Selected State - Bold and Clear */
+    /* Selected State - Clear and Distinct */
     #fileTree .selected {
-      background: var(--md-sys-color-primary);
-      color: var(--md-sys-color-on-primary);
-      box-shadow:
-        0 2px 8px rgba(103, 80, 164, 0.3),
-        0 4px 12px rgba(103, 80, 164, 0.2),
-        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-      transform: translateX(4px);
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      border-left: 3px solid var(--md-sys-color-primary);
       font-weight: 500;
-      border: 1px solid var(--md-sys-color-primary);
     }
+
     #fileTree .selected::before {
-      color: var(--md-sys-color-on-primary) !important;
       opacity: 1 !important;
     }
 
@@ -873,82 +825,79 @@
     }
     #preview {
       line-height: 1.7;
-      background: var(--md-sys-color-surface-container-low);
-      border-radius: var(--md-sys-radius-xl);
-      padding: 40px;
-      max-width: 900px;
+      background: var(--md-sys-color-surface);
+      border-radius: var(--md-sys-shape-corner-large);
+      padding: 32px;
+      max-width: 720px; /* Optimal reading width for better readability */
       margin: 0 auto;
-      box-shadow:
-        0 2px 4px -1px rgba(0, 0, 0, 0.06),
-        0 4px 8px -1px rgba(0, 0, 0, 0.1),
-        0 8px 16px -2px rgba(0, 0, 0, 0.08),
-        0 1px 0 0 rgba(255, 255, 255, 0.05) inset;
+      box-shadow: var(--md-sys-elevation-1);
       animation: fadeIn var(--md-sys-motion-medium) var(--md-sys-motion-easing-decelerate);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--md-sys-color-outline-variant);
     }
     /* M3 Typography Scale for Preview Content */
     #preview h1 {
-      font-size: var(--md-sys-typescale-display-small-font-size);
-      line-height: var(--md-sys-typescale-display-small-line-height);
-      letter-spacing: var(--md-sys-typescale-display-small-letter-spacing);
-      font-weight: 600;
-      margin: 32px 0 24px 0;
+      font-size: 36px;
+      line-height: 1.2;
+      font-weight: 700;
+      margin: 48px 0 24px 0;
       color: var(--md-sys-color-on-surface);
+      letter-spacing: -0.5px;
     }
     #preview h1:first-child {
       margin-top: 0;
     }
     #preview h2 {
-      font-size: var(--md-sys-typescale-headline-large-font-size);
-      line-height: var(--md-sys-typescale-headline-large-line-height);
-      letter-spacing: var(--md-sys-typescale-headline-large-letter-spacing);
+      font-size: 28px;
+      line-height: 1.3;
       font-weight: 600;
-      margin: 28px 0 20px 0;
+      margin: 40px 0 20px 0;
       color: var(--md-sys-color-on-surface);
+      letter-spacing: -0.3px;
     }
     #preview h3 {
-      font-size: var(--md-sys-typescale-headline-medium-font-size);
-      line-height: var(--md-sys-typescale-headline-medium-line-height);
-      letter-spacing: var(--md-sys-typescale-headline-medium-letter-spacing);
+      font-size: 22px;
+      line-height: 1.4;
       font-weight: 600;
-      margin: 24px 0 16px 0;
+      margin: 32px 0 16px 0;
       color: var(--md-sys-color-on-surface);
+      letter-spacing: -0.2px;
     }
     #preview h4 {
-      font-size: var(--md-sys-typescale-headline-small-font-size);
-      line-height: var(--md-sys-typescale-headline-small-line-height);
-      letter-spacing: var(--md-sys-typescale-headline-small-letter-spacing);
+      font-size: 18px;
+      line-height: 1.5;
+      font-weight: 600;
+      margin: 24px 0 12px 0;
+      color: var(--md-sys-color-on-surface);
+      letter-spacing: 0;
+    }
+    #preview h5 {
+      font-size: 16px;
+      line-height: 1.5;
       font-weight: 600;
       margin: 20px 0 12px 0;
       color: var(--md-sys-color-on-surface);
-    }
-    #preview h5 {
-      font-size: var(--md-sys-typescale-title-large-font-size);
-      line-height: var(--md-sys-typescale-title-large-line-height);
-      letter-spacing: var(--md-sys-typescale-title-large-letter-spacing);
-      font-weight: 600;
-      margin: 16px 0 12px 0;
-      color: var(--md-sys-color-on-surface);
+      letter-spacing: 0;
     }
     #preview h6 {
-      font-size: var(--md-sys-typescale-title-medium-font-size);
-      line-height: var(--md-sys-typescale-title-medium-line-height);
-      letter-spacing: var(--md-sys-typescale-title-medium-letter-spacing);
+      font-size: 14px;
+      line-height: 1.5;
       font-weight: 600;
       margin: 16px 0 12px 0;
       color: var(--md-sys-color-on-surface-variant);
+      letter-spacing: 0.1px;
     }
     #preview p {
-      font-size: var(--md-sys-typescale-body-large-font-size);
-      line-height: var(--md-sys-typescale-body-large-line-height);
-      letter-spacing: var(--md-sys-typescale-body-large-letter-spacing);
+      font-size: 16px;
+      line-height: 1.7;
       margin: 0 0 16px 0;
       color: var(--md-sys-color-on-surface);
     }
+    #preview p + p {
+      margin-top: 16px;
+    }
     #preview ul, #preview ol {
-      font-size: var(--md-sys-typescale-body-large-font-size);
-      line-height: var(--md-sys-typescale-body-large-line-height);
-      letter-spacing: var(--md-sys-typescale-body-large-letter-spacing);
+      font-size: 16px;
+      line-height: 1.7;
       margin: 0 0 16px 0;
       padding-left: 24px;
     }
@@ -967,13 +916,17 @@
     }
     #preview a {
       color: var(--md-sys-color-primary);
-      text-decoration: none;
+      text-decoration: underline;
+      text-decoration-color: var(--md-sys-color-primary);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
       font-weight: 500;
-      transition: color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+      transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
     }
     #preview a:hover {
       color: var(--md-sys-color-primary);
-      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
     }
     #preview strong {
       font-weight: 600;
@@ -1113,10 +1066,10 @@
     .sidebar-tabs {
       display: flex;
       gap: 0;
-      margin: -16px -16px 16px -16px;
-      padding: 0;
-      background: var(--md-sys-color-surface-container-highest);
-      border-bottom: 2px solid var(--md-sys-color-outline-variant);
+      margin: 0;
+      padding: 0 16px;
+      background: transparent;
+      border-bottom: 1px solid var(--md-sys-color-outline-variant);
     }
     .sidebar-tab {
       flex: 1;
@@ -1124,24 +1077,24 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 14px 12px;
+      padding: 16px 12px;
       background: transparent;
       color: var(--md-sys-color-on-surface-variant);
       border: none;
-      border-bottom: 3px solid transparent;
+      border-bottom: 2px solid transparent;
       cursor: pointer;
       transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
-      font-size: var(--md-sys-typescale-title-small-font-size);
+      font-size: 14px;
       font-weight: 500;
       position: relative;
-      margin-bottom: -2px;
+      margin-bottom: -1px;
     }
-    .sidebar-tab:hover {
-      background: var(--md-sys-color-surface-container-high);
+    .sidebar-tab:hover:not(.active) {
+      background: var(--md-sys-color-surface-container-highest);
       color: var(--md-sys-color-on-surface);
     }
     .sidebar-tab.active {
-      background: var(--md-sys-color-surface-container);
+      background: transparent;
       color: var(--md-sys-color-primary);
       border-bottom-color: var(--md-sys-color-primary);
       font-weight: 600;
@@ -1149,6 +1102,9 @@
     .tab-icon {
       font-size: 18px;
       opacity: 0.9;
+    }
+    .tab-content {
+      padding: 16px;
     }
     .sidebar-tab.active .tab-icon {
       opacity: 1;
@@ -1940,8 +1896,23 @@
     .sidebar-overlay.show {
       display: block;
     }
+    /* Responsive padding adjustments */
+    @media (max-width: 1024px) {
+      section {
+        padding: 32px 24px;
+      }
+      #preview {
+        padding: 24px;
+      }
+    }
     /* Mobile responsive styles */
     @media (max-width: 768px) {
+      section {
+        padding: 24px 16px;
+      }
+      #preview {
+        padding: 16px;
+      }
       header {
         padding: 8px 16px;
       }
@@ -2570,6 +2541,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/highlight.js/lib/common/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
@@ -2601,6 +2573,11 @@
       FILE_EXTENSIONS: ['.md', '.markdown'],
       SEARCH_DEBOUNCE_MS: 300,
       RENDER_DEBOUNCE_MS: 150,
+      SECURITY: {
+        MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB maximum file size
+        MAX_FILE_COUNT: 10000, // Maximum 10,000 files
+        MAX_TOTAL_SIZE: 500 * 1024 * 1024 // 500MB total size limit
+      },
       PERFORMANCE: {
         CACHE_MAX_SIZE: 50, // Maximum number of files to cache
         CACHE_MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB max file size to cache
@@ -2634,7 +2611,10 @@
         LOAD_ERROR: '⚠️ Failed to load files. Please check the file format and try again.',
         ZIP_ERROR: '⚠️ Failed to extract ZIP file. Please ensure it\'s a valid ZIP archive containing markdown files.',
         FILE_READ_ERROR: '⚠️ Failed to read file. The file may be corrupted or inaccessible.',
-        NO_MD_FILES: '⚠️ No markdown files found. Please ensure your files have .md or .markdown extensions.'
+        NO_MD_FILES: '⚠️ No markdown files found. Please ensure your files have .md or .markdown extensions.',
+        FILE_TOO_LARGE: '⚠️ File is too large. Maximum file size is 50MB.',
+        TOO_MANY_FILES: '⚠️ Too many files. Maximum is 10,000 files.',
+        TOTAL_SIZE_EXCEEDED: '⚠️ Total file size exceeds limit of 500MB.'
       }
     };
 
@@ -2716,18 +2696,91 @@
     };
 
     // ============================================================================
+    // STATE VALIDATION
+    // ============================================================================
+
+    /**
+     * Validator functions for different state types
+     */
+    const StateValidators = {
+      folderState: (state) => {
+        if (typeof state !== 'object' || state === null) return false;
+        for (const [key, value] of Object.entries(state)) {
+          if (typeof key !== 'string' || typeof value !== 'boolean') return false;
+        }
+        return true;
+      },
+
+      recentFiles: (state) => {
+        if (!Array.isArray(state)) return false;
+        return state.every(item => typeof item === 'string');
+      },
+
+      favorites: (state) => {
+        if (!Array.isArray(state)) return false;
+        return state.every(item => typeof item === 'string');
+      },
+
+      searchMode: (state) => {
+        return state === 'filename' || state === 'content';
+      },
+
+      treeSortOrder: (state) => {
+        return state === 'asc' || state === 'desc';
+      },
+
+      numericSetting: (state) => {
+        return typeof state === 'number' && !isNaN(state) && state > 0;
+      }
+    };
+
+    /**
+     * Validates and sanitizes localStorage state
+     * @param {string} key - Storage key
+     * @param {*} defaultValue - Default value if validation fails
+     * @param {Function} validator - Validation function
+     * @returns {*} Validated state or default value
+     */
+    function loadValidatedState(key, defaultValue, validator) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return defaultValue;
+
+        let parsed;
+        try {
+          // Try to parse as JSON
+          parsed = JSON.parse(raw);
+        } catch (jsonError) {
+          // If JSON parse fails, use the raw value (for legacy string values)
+          parsed = raw;
+        }
+
+        // Run validator if provided
+        if (validator && !validator(parsed)) {
+          console.warn(`State validation failed for ${key}, using default`);
+          return defaultValue;
+        }
+
+        return parsed;
+      } catch (e) {
+        console.warn(`Failed to load state for ${key}:`, e);
+        return defaultValue;
+      }
+    }
+
+    // ============================================================================
     // STATE MANAGEMENT
     // ============================================================================
     let tree = null;
     let selectedPath = null;
     let focusedPath = null;
-    let folderState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FOLDER_STATE) || '{}');
+    let folderState = loadValidatedState(CONFIG.STORAGE_KEYS.FOLDER_STATE, {}, StateValidators.folderState);
     let searchDebounceTimer = null;
     let allFileNodes = [];
-    let searchMode = localStorage.getItem(CONFIG.STORAGE_KEYS.SEARCH_MODE) || 'filename';
-    let recentFiles = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.RECENT_FILES) || '[]');
-    let favorites = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]');
-    let treeSortOrder = localStorage.getItem(CONFIG.STORAGE_KEYS.TREE_SORT_ORDER) || 'asc'; // 'asc' or 'desc'
+    let searchMode = loadValidatedState(CONFIG.STORAGE_KEYS.SEARCH_MODE, 'filename', StateValidators.searchMode);
+    let recentFiles = loadValidatedState(CONFIG.STORAGE_KEYS.RECENT_FILES, [], StateValidators.recentFiles);
+    let favorites = loadValidatedState(CONFIG.STORAGE_KEYS.FAVORITES, [], StateValidators.favorites);
+    let treeSortOrder = loadValidatedState(CONFIG.STORAGE_KEYS.TREE_SORT_ORDER, 'asc', StateValidators.treeSortOrder);
     let renderDebounceTimer = null;
     let searchInProgress = false;
 
@@ -2890,6 +2943,114 @@
         localStorage.setItem(CONFIG.STORAGE_KEYS.FOLDER_STATE, JSON.stringify(folderState));
       } catch (e) {
         console.warn('Failed to save folder state:', e);
+      }
+    }
+
+    // ============================================================================
+    // ERROR HANDLING & VALIDATION
+    // ============================================================================
+
+    /**
+     * Custom error class for application-specific errors
+     */
+    class AppError extends Error {
+      constructor(message, code, context = {}) {
+        super(message);
+        this.name = 'AppError';
+        this.code = code;
+        this.context = context;
+        this.timestamp = new Date().toISOString();
+      }
+    }
+
+    /**
+     * Error codes for different types of failures
+     */
+    const ERROR_CODES = {
+      FILE_TOO_LARGE: 'FILE_TOO_LARGE',
+      TOO_MANY_FILES: 'TOO_MANY_FILES',
+      TOTAL_SIZE_EXCEEDED: 'TOTAL_SIZE_EXCEEDED',
+      INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
+      FILE_READ_ERROR: 'FILE_READ_ERROR',
+      STATE_VALIDATION_ERROR: 'STATE_VALIDATION_ERROR',
+      RENDER_ERROR: 'RENDER_ERROR'
+    };
+
+    /**
+     * Handles application errors with structured logging and user feedback
+     * @param {Error|AppError} error - The error to handle
+     */
+    function handleError(error) {
+      console.error('Application error:', {
+        message: error.message,
+        code: error.code || 'UNKNOWN',
+        context: error.context || {},
+        timestamp: error.timestamp || new Date().toISOString(),
+        stack: error.stack
+      });
+
+      const userMessage = getUserFriendlyMessage(error);
+      showError(userMessage);
+    }
+
+    /**
+     * Converts technical errors to user-friendly messages
+     * @param {Error|AppError} error - The error
+     * @returns {string} User-friendly error message
+     */
+    function getUserFriendlyMessage(error) {
+      if (error instanceof AppError) {
+        switch (error.code) {
+          case ERROR_CODES.FILE_TOO_LARGE:
+            return CONFIG.MESSAGES.FILE_TOO_LARGE;
+          case ERROR_CODES.TOO_MANY_FILES:
+            return CONFIG.MESSAGES.TOO_MANY_FILES;
+          case ERROR_CODES.TOTAL_SIZE_EXCEEDED:
+            return CONFIG.MESSAGES.TOTAL_SIZE_EXCEEDED;
+          case ERROR_CODES.FILE_READ_ERROR:
+            return CONFIG.MESSAGES.FILE_READ_ERROR;
+          default:
+            return error.message;
+        }
+      }
+      return CONFIG.MESSAGES.LOAD_ERROR;
+    }
+
+    /**
+     * Validates file size and count limits
+     * @param {Array} files - Array of files to validate
+     * @throws {AppError} If validation fails
+     */
+    function validateFiles(files) {
+      // Check file count
+      if (files.length > CONFIG.SECURITY.MAX_FILE_COUNT) {
+        throw new AppError(
+          `Too many files: ${files.length}`,
+          ERROR_CODES.TOO_MANY_FILES,
+          { fileCount: files.length, limit: CONFIG.SECURITY.MAX_FILE_COUNT }
+        );
+      }
+
+      // Check individual file sizes and total size
+      let totalSize = 0;
+      for (const file of files) {
+        if (file.file.size > CONFIG.SECURITY.MAX_FILE_SIZE) {
+          throw new AppError(
+            `File too large: ${file.path}`,
+            ERROR_CODES.FILE_TOO_LARGE,
+            { path: file.path, size: file.file.size, limit: CONFIG.SECURITY.MAX_FILE_SIZE }
+          );
+        }
+        totalSize += file.file.size;
+      }
+
+      // Check total size
+      if (totalSize > CONFIG.SECURITY.MAX_TOTAL_SIZE) {
+        throw new AppError(
+          `Total size exceeded: ${totalSize} bytes`,
+          ERROR_CODES.TOTAL_SIZE_EXCEEDED,
+          { totalSize, limit: CONFIG.SECURITY.MAX_TOTAL_SIZE }
+        );
       }
     }
 
@@ -3090,16 +3251,23 @@
      */
     function setSearchMode(mode) {
       searchMode = mode;
-      localStorage.setItem(CONFIG.STORAGE_KEYS.SEARCH_MODE, mode);
+      localStorage.setItem(CONFIG.STORAGE_KEYS.SEARCH_MODE, JSON.stringify(mode));
 
-      DOM.searchFilenameBtn.classList.toggle('active', mode === 'filename');
-      DOM.searchContentBtn.classList.toggle('active', mode === 'content');
+      // Update UI if elements exist
+      if (DOM.searchFilenameBtn) {
+        DOM.searchFilenameBtn.classList.toggle('active', mode === 'filename');
+      }
+      if (DOM.searchContentBtn) {
+        DOM.searchContentBtn.classList.toggle('active', mode === 'content');
+      }
 
-      DOM.searchBox.placeholder = mode === 'filename' ? 'Search files' : 'Search in content';
+      if (DOM.searchBox) {
+        DOM.searchBox.placeholder = mode === 'filename' ? 'Search files' : 'Search in content';
 
-      // Re-run search if there's a query
-      if (DOM.searchBox.value.trim()) {
-        performSearch(DOM.searchBox.value.trim());
+        // Re-run search if there's a query
+        if (DOM.searchBox.value.trim()) {
+          performSearch(DOM.searchBox.value.trim());
+        }
       }
     }
 
@@ -3580,7 +3748,7 @@
         URL.revokeObjectURL(url);
 
         hideLoading();
-        showToast('HTML exported successfully', 'success');
+        // File download is sufficient feedback, no toast needed
       } catch (error) {
         hideLoading();
         console.error('HTML export error:', error);
@@ -3658,7 +3826,7 @@
         pdf.save((selectedPath ? selectedPath.replace(/\//g, '_') : 'markdown') + '.pdf');
 
         hideLoading();
-        showToast('PDF exported successfully', 'success');
+        // File download is sufficient feedback, no toast needed
       } catch (error) {
         hideLoading();
         console.error('PDF export error:', error);
@@ -3706,7 +3874,7 @@ ${content}`;
         URL.revokeObjectURL(url);
 
         hideLoading();
-        showToast('Markdown exported successfully', 'success');
+        // File download is sufficient feedback, no toast needed
       } catch (error) {
         hideLoading();
         console.error('Markdown export error:', error);
@@ -3726,7 +3894,7 @@ ${content}`;
       try {
         const htmlContent = DOM.preview.innerHTML;
         await navigator.clipboard.writeText(htmlContent);
-        showToast('HTML copied to clipboard', 'success');
+        showToast('HTML copied', 'success', 1500);
       } catch (error) {
         console.error('Copy HTML error:', error);
         showToast('Failed to copy HTML', 'error');
@@ -3750,7 +3918,7 @@ ${content}`;
 
         const content = await lazyLoadFileContent(node.file);
         await navigator.clipboard.writeText(content);
-        showToast('Markdown copied to clipboard', 'success');
+        showToast('Markdown copied', 'success', 1500);
       } catch (error) {
         console.error('Copy Markdown error:', error);
         showToast('Failed to copy Markdown', 'error');
@@ -3769,7 +3937,7 @@ ${content}`;
       try {
         const plainText = DOM.preview.innerText;
         await navigator.clipboard.writeText(plainText);
-        showToast('Plain text copied to clipboard', 'success');
+        showToast('Text copied', 'success', 1500);
       } catch (error) {
         console.error('Copy plain text error:', error);
         showToast('Failed to copy plain text', 'error');
@@ -3864,9 +4032,10 @@ ${content}`;
 
             if (exportFormat === 'html') {
               const html = marked.parse(content);
+              const sanitizedHtml = DOMPurify.sanitize(html);
               const fullHtml = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>${node.path}</title></head>
-<body>${html}</body></html>`;
+<body>${sanitizedHtml}</body></html>`;
               zip.file(node.path.replace(/\.md$/, '.html'), fullHtml);
             } else {
               zip.file(node.path, content);
@@ -3893,9 +4062,10 @@ ${content}`;
 
             if (format === 'html') {
               const html = marked.parse(content);
+              const sanitizedHtml = DOMPurify.sanitize(html);
               const fullHtml = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>${node.path}</title></head>
-<body>${html}</body></html>`;
+<body>${sanitizedHtml}</body></html>`;
               const blob = new Blob([fullHtml], { type: 'text/html' });
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
@@ -3918,7 +4088,7 @@ ${content}`;
           }
         }
 
-        showToast(`Successfully exported ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}`, 'success');
+        showToast(`Exported ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}`, 'success', 2000);
         closeBatchExport();
       } catch (error) {
         console.error('Batch export error:', error);
@@ -4224,10 +4394,8 @@ ${content}`;
     function announceToScreenReader(message) {
       if (!message) return;
 
-      // Show visual toast notification for sighted users
-      showToast(message, 'info', 3000);
-
-      // Also update aria-live region for screen readers
+      // Only update aria-live region for screen readers (no visual toast)
+      // Visual feedback is provided by UI changes (file opens, theme changes, etc.)
       if (DOM.srAnnouncements) {
         // Clear previous announcement
         DOM.srAnnouncements.textContent = '';
@@ -4452,6 +4620,9 @@ ${content}`;
           return;
         }
 
+        // Validate file sizes and count
+        validateFiles(markdownFiles);
+
         const newTree = buildTree(markdownFiles);
         if (!tree) {
           tree = newTree;
@@ -4464,15 +4635,17 @@ ${content}`;
 
         renderTree();
 
-        const fileCount = markdownFiles.length;
-        showToast(`Successfully loaded ${fileCount} file${fileCount !== 1 ? 's' : ''}`, 'success');
-
+        // Tree rendering provides sufficient visual feedback
         // Render recent files and favorites after loading new files
         renderRecentFiles();
         renderFavorites();
       } catch (e) {
-        console.error('Error loading files:', e);
-        showError(CONFIG.MESSAGES.LOAD_ERROR);
+        if (e instanceof AppError) {
+          handleError(e);
+        } else {
+          console.error('Error loading files:', e);
+          showError(CONFIG.MESSAGES.LOAD_ERROR);
+        }
       }
     }
 
@@ -4536,6 +4709,205 @@ ${content}`;
       file._content = content;
       return content;
     }
+
+    // ============================================================================
+    // SEARCH INDEX
+    // ============================================================================
+
+    /**
+     * Search index for instant content search using inverted index
+     */
+    class SearchIndex {
+      constructor() {
+        this.index = new Map(); // word -> Set of file paths
+        this.documents = new Map(); // path -> {content, wordCount, lastIndexed}
+        this.isIndexing = false;
+        this.indexProgress = 0;
+      }
+
+      /**
+       * Tokenizes text into searchable words
+       * @param {string} text - Text to tokenize
+       * @returns {Array<string>} Array of lowercase tokens
+       */
+      tokenize(text) {
+        return text
+          .toLowerCase()
+          .split(/\W+/)
+          .filter(word => word.length >= 2); // Minimum 2 characters
+      }
+
+      /**
+       * Indexes a single document
+       * @param {string} path - File path
+       * @param {string} content - File content
+       */
+      indexDocument(path, content) {
+        const words = this.tokenize(content);
+        const uniqueWords = new Set(words);
+
+        // Remove old index entries for this document
+        this.removeDocument(path);
+
+        // Add new index entries
+        for (const word of uniqueWords) {
+          if (!this.index.has(word)) {
+            this.index.set(word, new Set());
+          }
+          this.index.get(word).add(path);
+        }
+
+        // Store document metadata
+        this.documents.set(path, {
+          content,
+          wordCount: words.length,
+          lastIndexed: Date.now()
+        });
+      }
+
+      /**
+       * Removes a document from the index
+       * @param {string} path - File path
+       */
+      removeDocument(path) {
+        // Remove from inverted index
+        for (const [word, paths] of this.index.entries()) {
+          paths.delete(path);
+          if (paths.size === 0) {
+            this.index.delete(word);
+          }
+        }
+
+        // Remove document metadata
+        this.documents.delete(path);
+      }
+
+      /**
+       * Searches the index for a query
+       * @param {string} query - Search query
+       * @returns {Array<{path: string, snippet: string, score: number}>}
+       */
+      search(query) {
+        const queryWords = this.tokenize(query);
+        if (queryWords.length === 0) return [];
+
+        // Find documents containing any query word
+        const documentScores = new Map();
+
+        for (const word of queryWords) {
+          const matchingPaths = this.index.get(word) || new Set();
+
+          for (const path of matchingPaths) {
+            const currentScore = documentScores.get(path) || 0;
+            documentScores.set(path, currentScore + 1);
+          }
+        }
+
+        // Convert to results array with snippets
+        const results = [];
+        for (const [path, score] of documentScores.entries()) {
+          const doc = this.documents.get(path);
+          if (doc) {
+            const snippet = this.extractSnippet(doc.content, query);
+            results.push({ path, snippet, score });
+          }
+        }
+
+        // Sort by score (descending)
+        results.sort((a, b) => b.score - a.score);
+
+        return results;
+      }
+
+      /**
+       * Extracts a relevant snippet around the query
+       * @param {string} content - Document content
+       * @param {string} query - Search query
+       * @returns {string} Snippet with context
+       */
+      extractSnippet(content, query) {
+        const lowerContent = content.toLowerCase();
+        const lowerQuery = query.toLowerCase();
+        const index = lowerContent.indexOf(lowerQuery);
+
+        if (index === -1) return content.substring(0, 100) + '...';
+
+        const start = Math.max(0, index - 30);
+        const end = Math.min(content.length, index + query.length + 30);
+        let snippet = content.substring(start, end);
+
+        if (start > 0) snippet = '...' + snippet;
+        if (end < content.length) snippet = snippet + '...';
+
+        return snippet;
+      }
+
+      /**
+       * Indexes all files in the tree
+       * @param {Array} fileNodes - Array of file nodes
+       * @param {Function} progressCallback - Progress callback (current, total)
+       */
+      async indexAllFiles(fileNodes, progressCallback) {
+        if (this.isIndexing) return;
+
+        this.isIndexing = true;
+        this.indexProgress = 0;
+
+        try {
+          for (let i = 0; i < fileNodes.length; i++) {
+            const node = fileNodes[i];
+
+            // Check if already cached
+            let content = fileContentsCache.get(node.path);
+            if (!content) {
+              content = await lazyLoadFileContent(node.file);
+              fileContentsCache.set(node.path, content);
+            }
+
+            this.indexDocument(node.path, content);
+
+            this.indexProgress = ((i + 1) / fileNodes.length) * 100;
+            if (progressCallback) {
+              progressCallback(i + 1, fileNodes.length);
+            }
+
+            // Yield to UI every 10 files
+            if ((i + 1) % 10 === 0) {
+              await new Promise(resolve => setTimeout(resolve, 0));
+            }
+          }
+
+          console.log(`Search index built: ${this.index.size} unique words, ${this.documents.size} documents`);
+        } finally {
+          this.isIndexing = false;
+        }
+      }
+
+      /**
+       * Clears the entire index
+       */
+      clear() {
+        this.index.clear();
+        this.documents.clear();
+        this.indexProgress = 0;
+      }
+
+      /**
+       * Gets index statistics
+       * @returns {Object} Statistics about the index
+       */
+      getStats() {
+        return {
+          uniqueWords: this.index.size,
+          documents: this.documents.size,
+          isIndexing: this.isIndexing,
+          progress: this.indexProgress
+        };
+      }
+    }
+
+    // Global search index instance
+    let searchIndex = new SearchIndex();
 
     // ============================================================================
     // RENDERING
@@ -4699,7 +5071,7 @@ ${content}`;
     function refreshTree() {
       renderTree();
       updateTreeStats();
-      showToast('Tree refreshed', 'success');
+      // Visual update provides sufficient feedback
     }
 
     /**
@@ -4878,7 +5250,15 @@ ${content}`;
         performanceMetrics.filesLoaded++;
 
         const html = marked.parse(text);
-        DOM.preview.innerHTML = html;
+        const sanitizedHtml = DOMPurify.sanitize(html, {
+          ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'code', 'pre', 'a', 'img',
+                         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote',
+                         'table', 'thead', 'tbody', 'tr', 'th', 'td', 'div', 'span', 'hr',
+                         'mark', 'del', 'ins', 'sub', 'sup'],
+          ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'id', 'style'],
+          ALLOW_DATA_ATTR: false
+        });
+        DOM.preview.innerHTML = sanitizedHtml;
 
         // Apply syntax highlighting
         if (window.hljs && window.hljs.highlightAll) {
@@ -4928,7 +5308,7 @@ ${content}`;
             navigator.clipboard.writeText(codeBlock.textContent.trim());
             btn.classList.add(CONFIG.CSS_CLASSES.COPIED);
             setTimeout(() => btn.classList.remove(CONFIG.CSS_CLASSES.COPIED), 1500);
-            showToast('Code copied to clipboard', 'success', 2000);
+            showToast('Code copied', 'success', 1500);
           };
           pre.appendChild(btn);
         });
@@ -5558,7 +5938,9 @@ ${content}`;
     }
 
     // Initialize search mode
-    setSearchMode(searchMode);
+    if (searchMode) {
+      setSearchMode(searchMode);
+    }
 
     // Render recent files and favorites
     renderRecentFiles();
